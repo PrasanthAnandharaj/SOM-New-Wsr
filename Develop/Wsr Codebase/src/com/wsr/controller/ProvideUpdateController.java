@@ -134,9 +134,7 @@ public class ProvideUpdateController {
 			
 		}if(!provideUpdateUtilMap.get("SubDomain").equals(DefaultSelection)){
 			
-			incBeanObj.setsubDomainName(provideUpdateUtilMap.get("SubDomain"));
-			
-			// corrected bean
+			incBeanObj.setsubDomainName(provideUpdateUtilMap.get("SubDomain"));		
 			
 		}if(!provideUpdateUtilMap.get("RootCause").equals(DefaultSelection)){
 			
