@@ -138,11 +138,11 @@ public class ProvideUpdateController {
 			
 		}if(!provideUpdateUtilMap.get("RootCause").equals(DefaultSelection)){
 			
-			incBeanObj.setdomainName(provideUpdateUtilMap.get("RootCause"));
+			incBeanObj.setrootCauseName(provideUpdateUtilMap.get("RootCause"));
 			
 		}if(!provideUpdateUtilMap.get("IssueIn").equals(DefaultSelection)){
 			
-			incBeanObj.setsubDomainName(provideUpdateUtilMap.get("IssueIn"));
+			incBeanObj.setupdateCountryName(provideUpdateUtilMap.get("IssueIn"));
 			
 		}
 		
