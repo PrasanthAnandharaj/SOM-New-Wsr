@@ -1,5 +1,6 @@
 package com.wsr.dao;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,12 +27,12 @@ public class ManagerActivitiesDaoHelper {
 
 	public String getOpenTicketsInTeamQuery() {
 		
-		return "Select * from dbo.vTestTempTable where (Status <> \'BAM : Closed\' AND SM7Status <> \'Closed\' AND IsUpdated <> \'\')";
+		return "Select distinct * from dbo.vTestTempTable where (Status <> \'BAM : Closed\' AND SM7Status <> \'Closed\' AND IsUpdated <> \'\')";
 	}
 
 	public String getSelectedMemberOpenTickets(String selectedMember) {
 		
-		return "Select * from dbo.vTestTempTable where (Assignee = \'"+selectedMember+"\' AND Status <> \'BAM : Closed\' AND SM7Status <> \'Closed\')";
+		return "Select distinct * from dbo.vTestTempTable where (Assignee = \'"+selectedMember+"\' AND Status <> \'BAM : Closed\' AND SM7Status <> \'Closed\')";
 	}
 
 	public String generateFilterQuery(Map<String, List<String>> searchFilterCriteriaMap, List<String[]> filterFieldsUtilLs) {
@@ -154,6 +155,27 @@ public class ManagerActivitiesDaoHelper {
 		String updateCountryID = incBeanLs.get(listCount).getupdateCountryName();
 		String query=  "INSERT INTO dbo.TestTempTable VALUES(\'"+ incidentID + "\',\'"+interactionID+"\',\'"+ severity + "\',\'"+ dateCreated +"\'," + dateClosed +",\'"+ assignee +"\',null,\'"+ status +"\',\'"+ title + "\',\'"+ contactWhoRaised +"\',\'"+ asset +"\',null,null,null,null,\'"+ slaTargetDate +"\',\'"+ slaBreached +"\',null,null,"+ country +","+ closureCode +",\'"+ updatedTime +"\',null,"+ isUpdated +",null,"+ domainID +","+ subDomainID +","+ rootCauseID +","+ updateCountryID +")";
 			  // "VALUES (\'"+incBeanLs.get(1).getIncidentID()+"\',\'InteractionID\',\'"+incBeanLs.get(3).getSeverity()+"\',\'DateCreated\',\'DateClosed\',\'"+incBeanLs.get(4).getAssignee()+"\',\'Status\',\'SM7Status\',\'"+incBeanLs.get(2).getTitle()+"\',\'ContactWhoRaised\',\'Asset\',\'GSAP_IncidentID\',\'DefectID\',\'ProblemID\',\'ActionOn\',\'"+incBeanLs.get(5).getSla_target_date()+"\',\'SLABreached\',\'Priority\',\'Proactive\',\'Country\',\'ClosureCode\',\'SM7LastUpdate\',\'ReleaseID\',\'IsUpdated\',\'Color\',\'DomainID\',\'subDomainID\',\'RootCauseID\',\'UpdateCountryID\')";
+		return query;
+	}
+	
+/*
+ * DAO helper to add basic comment to new open incidents.
+ * */	
+public String getBasicCommentUpdateQuery(List<IncidentsBean> incBeanLs, int listCount){
+		
+		String incidentID = incBeanLs.get(listCount).getIncidentID();
+		//String updatedDate =
+		//String updatedTime = incBeanLs.get(listCount).getUpdateTime();
+		Date date = new Date( );
+	    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+	    String updatedDate= dateFormat.format(date);
+	    String update = "Investigation in progress";
+	    String actionOn = incBeanLs.get(listCount).getAssignee();
+	    String satusID = "2";
+	    String isValid = "1";
+	    String updatedBy = "Auto";
+		//String query = "INSERT INTO dbo.HistoricActivities VALUES(\'"+ incidentID +"\',\'"+satusID+"\',\'"+actionOn+"\',\'"+ update + "\',\'"+ updatedDate + "\',\'"+ updatedBy + "\',\'"+ isValid+"\')";
+		String query = "INSERT INTO dbo.HistoricActivities VALUES(\'"+ incidentID +"\',(select distinct StatusID from [dbo].[Status] where Status = 'BAM : Investigating'),\'"+actionOn+"\',\'"+ update + "\',\'"+ updatedDate + "\',\'"+ updatedBy + "\',\'"+ isValid+"\')";
 		return query;
 	}
 

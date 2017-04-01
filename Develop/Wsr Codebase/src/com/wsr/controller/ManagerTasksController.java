@@ -160,6 +160,8 @@ public class ManagerTasksController {
 		tempBean = null;
 		boolean updateFlag = false;
 		String query = null;
+		boolean commentUpdateFlag = false;
+		String basicCommentUpdateQuery = null;
 		try {
 			
 			// Getting Column Header
@@ -200,6 +202,13 @@ public class ManagerTasksController {
                 if(flag == false){
                 	query = managerDaoHelper.getInsertOpenIncidentListQuery(incBeanLs, listCount);
                 	updateFlag = mgrDoaObj.getOpenIncidentListUpadtes(query);
+                	System.out.println("inserted into testtemptable");
+                // Adding the basic comment for new open tickets
+                	
+                	basicCommentUpdateQuery = managerDaoHelper.getBasicCommentUpdateQuery(incBeanLs,listCount);
+                	System.out.println("basicqueryupdated" + basicCommentUpdateQuery);
+                	commentUpdateFlag = mgrDoaObj.getOpenIncidentListUpadtes(basicCommentUpdateQuery);
+                	System.out.println("inserted into historicactivities");
                 }
                 else{
                 	query = managerDaoHelper.getUpdateClosedIncidentListQuery(incBeanLs, listCount);

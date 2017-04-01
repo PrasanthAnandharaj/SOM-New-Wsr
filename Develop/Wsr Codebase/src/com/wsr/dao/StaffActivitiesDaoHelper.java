@@ -13,8 +13,8 @@ public class StaffActivitiesDaoHelper {
 	}
 	
 	public String getIncidentsInLoggedUserQuery(){
-		System.out.println("Select * from dbo.vIncidentsInQueue where Assignee = \'"+System.getProperty("user.name")+"\'" + "Order By SLATargetDate Asc");
-		return "Select * from dbo.vIncidentsInQueue where Assignee = \'"+System.getProperty("user.name")+"\'" + "Order By SLATargetDate Asc";
+		System.out.println("Select * from dbo.vOpenTicketsQueue where Assignee = \'"+System.getProperty("user.name")+"\'" + "Order By SLATargetDate Asc");
+		return "Select * from dbo.vOpenTicketsQueue where Assignee = \'"+System.getProperty("user.name")+"\'" + "Order By SLATargetDate Asc";
 	//	return "Select * from dbo.vIncidentsInQueue where Assignee = 'Sandhya.S.Parimi' Order By SLATargetDate Asc";
 	}
 
@@ -77,7 +77,7 @@ public class StaffActivitiesDaoHelper {
 
 	public String getTicketUpdates(String incidentToBeUpdated) {
 		
-		return "Select * from dbo.vHistoricActivities "+
+		return "Select distinct * from dbo.vHistoricActivities "+
 				"where IncidentID = \'"+incidentToBeUpdated+"\' AND isValid = 1 "+
 				"order by UpdateID asc";
 		
@@ -85,7 +85,7 @@ public class StaffActivitiesDaoHelper {
 
 	public String getAllStatusOptionsQuery() {
 		
-		return "Select Status from dbo.Status";
+		return "Select distinct Status from dbo.Status";
 		
 	}
 	
@@ -102,7 +102,7 @@ public class StaffActivitiesDaoHelper {
 	public String getProgressUpdateQuery(TicketUpdateBean tktUpdateObj) {
 				 
 		return "insert into dbo.HistoricActivities (IncidentID,StatusID,ActionOn,[Update],UpdateDate,UpdateBy,IsValid) " +
-						"values ("+"\'"+tktUpdateObj.getIncidentId()+"\',(Select StatusID from dbo.Status where Status=\'"+tktUpdateObj.getStatus()+"\'),\'"+tktUpdateObj.getActionOn()+
+						"values ("+"\'"+tktUpdateObj.getIncidentId()+"\',(Select distinct StatusID from dbo.Status where Status=\'"+tktUpdateObj.getStatus()+"\'),\'"+tktUpdateObj.getActionOn()+
 						"\',\'"+tktUpdateObj.getComment()+"\',\'"+tktUpdateObj.getUpdateDate()+"\',\'"+tktUpdateObj.getUpdateBy()+"\',\'"+tktUpdateObj.getIsValid()+"\')";
 	}
 
@@ -112,10 +112,10 @@ public class StaffActivitiesDaoHelper {
 				"[Status]=\'"+incBeanObj.getWsrCurrentStatus()+"\',"+
 				"IsUpdated=\'1\',"+
 				"ClosureCode=\'"+incBeanObj.getClosureCode()+"\',"+
-				"DomainID=(Select DomainId from dbo.vDomains where DomainName=\'"+incBeanObj.getdomainName()+"\'),"+
-				"subDomainID=(Select SubDomainID from dbo.vSubDomains where SubDomain=\'"+incBeanObj.getsubDomainName()+"\'),"+
-				"RootCauseID=(Select RootCauseId from dbo.vRootCause where RootCause=\'"+incBeanObj.getrootCauseName()+"\'),"+
-				"UpdateCountryID=(Select CountryId from dbo.vUpdateCountry where CountryName=\'"+incBeanObj.getupdateCountryName()+"\')"+
+				"DomainID=(Select distinct DomainId from dbo.vDomains where DomainName=\'"+incBeanObj.getdomainName()+"\'),"+
+				"subDomainID=(Select distinct SubDomainID from dbo.vSubDomains where SubDomain=\'"+incBeanObj.getsubDomainName()+"\'),"+
+				"RootCauseID=(Select distinct RootCauseId from dbo.vRootCause where RootCause=\'"+incBeanObj.getrootCauseName()+"\'),"+
+				"UpdateCountryID=(Select distinct CountryId from dbo.vUpdateCountry where CountryName=\'"+incBeanObj.getupdateCountryName()+"\')"+
 				"where IncidentID =\'"+incBeanObj.getIncidentID()+"\'";
 	}
 
