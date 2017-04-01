@@ -17,7 +17,7 @@ public class WsrLauncher {
 			
 			StaffActivitiesDao commondao = new StaffActivitiesDao();
 			StaffActivitiesDaoHelper daohelper = new StaffActivitiesDaoHelper();
-			
+	//testing git commit		
 			
 	//		StaffLandingPage screenObj = new StaffLandingPage();
 			ManagerLandingPage landingPageObj = new ManagerLandingPage();
