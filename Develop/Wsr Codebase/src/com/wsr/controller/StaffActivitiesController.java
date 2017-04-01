@@ -50,6 +50,10 @@ public class StaffActivitiesController {
 				
 					is_incidentRs_null = false;
 			}
+			else{
+				System.out.println("StaffActivites -- getLoggedUserIncidentsInQueue : IncInMyQueue has no row in DB !!");
+				//	return null;
+			}
 		}catch(Exception ex){
 			
 			System.out.println("StaffActivites -- getLoggedUserIncidentsInQueue :"+ex.getMessage());
@@ -97,7 +101,7 @@ public class StaffActivitiesController {
 					
 					if(searchByIncidentRs.next() == true){	
 						
-						System.out.println("FlowController -- searchTicketByIncidentID :: Duplicate records in DB");						
+						System.out.println("StaffActivites -- searchTicketByIncidentID :: Duplicate records in DB");						
 						search_Ticket_Status = "duplicate";
 						
 						//Making bean empty, as table not to display.
@@ -108,7 +112,7 @@ public class StaffActivitiesController {
 					
 				}else{
 					
-					System.out.println("FlowController -- searchTicketByIncidentID :: SearchTicket is null");
+					System.out.println("StaffActivites -- searchTicketByIncidentID :: SearchTicket is null");
 					search_Ticket_Status = "norecord";
 					
 					//Making bean empty, as table not to display.
@@ -119,7 +123,7 @@ public class StaffActivitiesController {
 			
 			}catch(Exception ex){
 					
-				System.out.println("FlowController -- searchTicketByIncidentID :"+ex.getMessage());
+				System.out.println("StaffActivites -- searchTicketByIncidentID :"+ex.getMessage());
 					
 			}
 
@@ -136,7 +140,7 @@ public class StaffActivitiesController {
 		
 		}catch(Exception ex){
 			
-		System.out.println("FlowController -- getTotalTicketsHandled :"+ex.getMessage());
+		System.out.println("StaffActivites -- getTotalTicketsHandled :"+ex.getMessage());
 			
 	}
 		
@@ -161,13 +165,13 @@ public class StaffActivitiesController {
 				}while(incInMyGroupRs.next() == true);
 			
 			}else{
-				
-				return null;
+				System.out.println("StaffActivites -- getMyGroupsIncInQueue : IncInMyGroupQueue has no row in DB !!");
+				//	return null;
 			}
 		
 		}catch(Exception ex){
 			
-		System.out.println("FlowController -- getMyGroupsIncInQueue :"+ex.getMessage());
+		System.out.println("StaffActivites -- getMyGroupsIncInQueue :"+ex.getMessage());
 			
 		}
 		
@@ -194,13 +198,13 @@ public class StaffActivitiesController {
 				}while(previousCommentsRs.next() == true);
 				
 			}else{
-				
-				return null;
+				System.out.println("StaffActivites -- getTicketUpdates : No Previous Valid Comments in DB !!");
+			//	return null;
 			}
 			
 		}catch(Exception ex){
 			
-			System.out.println("FlowController -- getTicketUpdates :"+ex.getMessage());
+			System.out.println("StaffActivites -- getTicketUpdates :"+ex.getMessage());
 			
 		}
 		return prevCommentsList;

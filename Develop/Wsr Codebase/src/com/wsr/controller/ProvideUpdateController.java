@@ -59,7 +59,7 @@ public class ProvideUpdateController {
 				}while(controllerRs.next() == true);
 				
 			}else{
-				commonUtilList = null;
+				System.out.println("ProvideUpdateController -- getStatusOptionsAsList : Status cant be found  from DB");
 			}
 			
 		}catch(Exception e){
@@ -106,7 +106,7 @@ public class ProvideUpdateController {
 					controllerFeedBack =  true;
 				}else{
 					controllerFeedBack =  false;
-					System.out.println("Multiple updates here");
+					System.out.println("ProvideUpdateController -- TicketProgressUpdate : Multiple updates here");
 				}
 			}else{
 				controllerFeedBack =  false;

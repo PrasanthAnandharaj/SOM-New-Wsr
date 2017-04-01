@@ -90,6 +90,8 @@ public class CommonTasksController {
 					incBeanLs .add(tempBean);
 					
 				}while(searchByKeyRs.next() == true);
+			}else{
+				System.out.println("CommonTasksController :: getIncidentsOpenWithTeam -- No ticket with searched keyword in DB !!");
 			}
 			
 		}catch(Exception ex){

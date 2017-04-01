@@ -133,7 +133,7 @@ public class ManagerLandingPage extends JTable{
 	 * @param loggedUserBean 
 	 * @wbp.parser.entryPoint
 	 */
-	public void diplayManagerPageUI(AuthoriseBean loggedUserBean){
+	public void diplayManagerPageUI(final AuthoriseBean loggedUserBean){
 		
 		try {
 		    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -344,32 +344,39 @@ public class ManagerLandingPage extends JTable{
 			public void actionPerformed(ActionEvent arg0) {
 			
 				mgrIncBeanLs.clear();
-				String selectedMember = cmbSrcByMember.getSelectedItem().toString();
-				if(!selectedMember.contains("Please Select")){
-					try{
-						mgrIncBeanLs = managerControllerObj.getMemberSpecificOpenTicket(selectedMember);
-						displayTable(mgrIncBeanLs);							
-					}catch(Exception ex){
-							System.out.println("ManagerLandingPage :: diplayManagerPageUI -- "+ex.getMessage());
-					}finally{
-						cmbSrcByMember.setSelectedIndex(0);
-					}
-				}
+				String selection = cmbSrcByMember.getSelectedItem().toString();
+				try{
+					if(!selection.contains("Please Select")){
 					
+							mgrIncBeanLs = managerControllerObj.getMemberSpecificOpenTicket(selection);
+							displayTable(mgrIncBeanLs);							
+						
+					}else{
+						mgrIncBeanLs = managerControllerObj.getMemberSpecificOpenTicket(loggedUserBean.getUserId());
+						displayTable(mgrIncBeanLs);	
+					}
+				}catch(Exception ex){
+					System.out.println("ManagerLandingPage :: diplayManagerPageUI -- "+ex.getMessage());
+				}finally{
+					cmbSrcByMember.setSelectedItem(selection);
+				}	
 			}
 		});
+		
 		cmbSrcByMember.setForeground(new Color(148, 0, 211));
 		cmbSrcByMember.setMaximumRowCount(50);
 		cmbSrcByMember.setFont(new Font("Verdana", Font.PLAIN, 14));
 		cmbSrcByMember.setBounds(154, 116, 224, 22);
-		pnlSearchByTxtInp.add(cmbSrcByMember);
+		
 		//clearing the LS for having only current elements..
 		mgrPageUtilLs.clear();
+		cmbSrcByMember.addItem("-- Please Select --");
 		mgrPageUtilLs = commonControllerObj.getAllMembers();
 		for(int cmbMbrIter=0;cmbMbrIter < mgrPageUtilLs.size();cmbMbrIter++){
 			cmbSrcByMember.addItem(mgrPageUtilLs.get(cmbMbrIter));
 		}
-				
+		pnlSearchByTxtInp.add(cmbSrcByMember);
+		
 		
 		lblSrchByMemeber = new JLabel(" Tickets of Member");
 		lblSrchByMemeber.setHorizontalAlignment(SwingConstants.LEFT);

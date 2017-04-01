@@ -54,7 +54,7 @@ public class ManagerTasksController {
 					mgrIncBeanLs.add(tempBean);
 				}
 			}else{
-				managerTasksRs = null;
+				System.out.println("ManagerTasksController :: getIncidentsOpenWithTeam -- IncOpenWithTeam is null in DB");
 			}
 		}catch(Exception ex){
 			System.out.println("ManagerTasksController :: getIncidentsOpenWithTeam -- "+ex.getMessage());
@@ -78,7 +78,8 @@ public class ManagerTasksController {
 					mgrIncBeanLs.add(tempBean);
 				}
 			}else{
-				managerTasksRs = null;
+				System.out.println("ManagerActivites -- getMemberSpecificOpenTicket : selectedMember has no open tkt in DB !!");
+				//	return null;
 			}
 		}catch(Exception ex){
 			System.out.println("ManagerTasksController :: getMemberSpecificOpenTicket -- "+ex.getMessage());
@@ -277,18 +278,15 @@ public class ManagerTasksController {
 	
 	public boolean searchIncById(String searchId) {
 		
+		flag = false;
 		managerTasksRs = null;
 		
 		String search_by_Inc_ID_Query = commonHelperObj.getSearchByIncIdQuery(searchId);
 		
 		try{
 			
-			managerTasksRs = commonDaoObj.searchByIncidentID(search_by_Inc_ID_Query);
-			if(managerTasksRs.next()){
-				flag = true;
-			}else{
-				flag = false;
-			}
+			managerTasksRs = commonDaoObj.searchByIncidentID(search_by_Inc_ID_Query);			
+			flag = (managerTasksRs.next()) ? true : false ;
 			
 		}catch(Exception ex){
 			System.out.println("CommonTasksController :: searchIncById -- "+ex.getMessage());

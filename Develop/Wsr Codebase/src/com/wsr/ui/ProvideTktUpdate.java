@@ -611,7 +611,7 @@ public class ProvideTktUpdate {
 			
 		}catch(Exception exp){
 
-			System.out.println("ManagerLandingPage -- setTable :"+exp.getMessage());
+			System.out.println("ProvideTktUpdate -- setTable :"+exp.getMessage());
 		}finally{
 			suggestedTblIncList.clear();
 			
@@ -625,6 +625,7 @@ public class ProvideTktUpdate {
 		try{
 			
 			ticketHistoryLs = staffCntrlObj.getTicketUpdates(incidentToBeUpdated);
+			System.out.println("FIX : Ticket's update size is : "+ticketHistoryLs.size());
 			
 			if(ticketHistoryLs.size() > 0){
 				
@@ -643,9 +644,9 @@ public class ProvideTktUpdate {
 			}
 			
 		}catch(Exception e){
-			
+			System.out.println("ProvideTktUpdate -- ShowTktUpdatesInTab :"+e.getMessage());
 		}finally{
-			ticketHistoryLs.clear();
+			
 		}
 	}
 
@@ -683,7 +684,7 @@ public class ProvideTktUpdate {
 			
 		}catch(Exception exp){
 
-			System.out.println("ManagerLandingPage -- showUpdatesInTable :"+exp.getMessage());
+			System.out.println("ProvideTktUpdate -- showUpdatesInTable :"+exp.getMessage());
 		}
 		
 		scrpnlInsideTab.setViewportView(updatesTbl);		

@@ -32,7 +32,7 @@ public class ManagerActivitiesDaoHelper {
 
 	public String getSelectedMemberOpenTickets(String selectedMember) {
 		
-		return "Select distinct * from dbo.vTestTempTable where (Assignee = \'"+selectedMember+"\' AND Status <> \'BAM : Closed\' AND SM7Status <> \'Closed\')";
+		return "Select distinct * from vOpenTicketsQueue where Assignee = \'"+selectedMember+"\'";
 	}
 
 	public String generateFilterQuery(Map<String, List<String>> searchFilterCriteriaMap, List<String[]> filterFieldsUtilLs) {
