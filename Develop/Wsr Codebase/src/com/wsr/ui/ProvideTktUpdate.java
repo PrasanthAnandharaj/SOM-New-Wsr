@@ -67,6 +67,7 @@ public class ProvideTktUpdate {
 	DefaultTableModel dtmUpdateTbl = new DefaultTableModel();
 	DefaultTableModel dtmSuggestedTbl = new DefaultTableModel();
 	
+	WsrCustomTableStyle tblStyleObj;
 	IncidentsBean setSearchedTktBean = new IncidentsBean();
 	CommonTasksController commCntrlObj = new CommonTasksController();
 	StaffActivitiesController staffCntrlObj = new StaffActivitiesController();
@@ -144,7 +145,7 @@ public class ProvideTktUpdate {
 		panel.add(scrSuggestedInc);
 		
 		tblSuggestedInc = new JTable();
-		tblSuggestedInc.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		
 		tblSuggestedInc.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -176,6 +177,11 @@ public class ProvideTktUpdate {
 		tblSuggestedInc.setFont(new Font("Verdana", Font.ITALIC, 12));
 		tblSuggestedInc.setToolTipText("Double click any row to provide update on particular ticket.. ");
 		tblSuggestedInc.setBackground(new Color(255, 250, 250));
+		tblSuggestedInc.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		
+		tblSuggestedInc.setDefaultRenderer(Object.class, new WsrCustomCellStandard());
+		
+		
 		scrSuggestedInc.setViewportView(tblSuggestedInc);
 		
 		tbpTktView = new JTabbedPane(JTabbedPane.TOP);
@@ -384,7 +390,7 @@ public class ProvideTktUpdate {
 			public void actionPerformed(ActionEvent arg0) {
 				
 				String inputValidations = updateFormValidation();
-				if(inputValidations.equals(SUCCESS)){
+				if(inputValidations.equalsIgnoreCase(SUCCESS)){
 					
 					boolean commentsUpdateSuccess = false;
 					provideUpdateInputsMap = new HashMap<>();
@@ -580,13 +586,11 @@ public class ProvideTktUpdate {
 		dtmSuggestedTbl.setRowCount(0);
 		dtmSuggestedTbl.setColumnCount(0);
 		
-		tblSuggestedInc.setModel(dtmSuggestedTbl);
-		
 		//Setting Table Header Props..
 		suggestTblheader = tblSuggestedInc.getTableHeader();
-		suggestTblheader.setBackground(Color.BLUE);
-		suggestTblheader.setForeground(Color.WHITE);
+		suggestTblheader.setDefaultRenderer(new WsrCustomHeaderRenderer(tblSuggestedInc,suggestTblheader));
 	    
+		tblSuggestedInc.setModel(dtmSuggestedTbl);
 	    dtmSuggestedTbl.addColumn("TicketID");
 	    dtmSuggestedTbl.addColumn("Title");
 	    
@@ -659,19 +663,20 @@ public class ProvideTktUpdate {
 		scrpnlInsideTab = new JScrollPane();
 		
 		updatesTbl = new JTable();
-		updatesTbl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		updatesTbl.setModel(dtmUpdateTbl);	
+		tblStyleObj = new WsrCustomTableStyle();
+		tblStyleObj.setWsrTableStandard(updatesTbl,"ProvideUpdateTable");
+		
+		updatesTbl.setModel(dtmUpdateTbl);
+		updatesTbl.setDefaultRenderer(Object.class, new WsrCustomCellStandard());
+		
 		updatesTblHeader = updatesTbl.getTableHeader();
+		updatesTblHeader.setDefaultRenderer(new WsrCustomHeaderRenderer(updatesTbl,updatesTblHeader));
 		
 		dtmUpdateTbl.setRowCount(0);
 		dtmUpdateTbl.setColumnCount(0);
 		dtmUpdateTbl.addColumn("Date");
 		dtmUpdateTbl.addColumn("Status");
 		dtmUpdateTbl.addColumn("Updates");
-		
-		updatesTblHeader.setFont(new Font("SansSerif", Font.BOLD, 14));
-		updatesTblHeader.setForeground(Color.BLUE);
-		updatesTblHeader.setBackground(Color.decode("#f0f8ff"));
 		
 		try{
 			for(int iter=0;iter<ticketHistoryLs.size();iter++){

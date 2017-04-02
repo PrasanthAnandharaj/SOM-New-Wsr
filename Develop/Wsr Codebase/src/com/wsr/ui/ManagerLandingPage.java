@@ -116,6 +116,7 @@ public class ManagerLandingPage extends JTable{
 	
 	uploadSheetUI uploadUiObj = new uploadSheetUI();
 	
+	WsrCustomTableStyle tblStyleObj;
 	BussinessReviewSheet businessSheetUiObj = new BussinessReviewSheet();
 	MemberManagementScreen manageScreenObj = new MemberManagementScreen();
 	CommonTasksController commonControllerObj = new CommonTasksController();
@@ -569,40 +570,6 @@ public class ManagerLandingPage extends JTable{
 		lblTblrowCount.setBounds(676, 352, 207, 16);
 		pnlTblDisp.add(lblTblrowCount);
 		
-		tblTkts = new JTable();
-		tblTkts.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		tblTkts.addMouseListener(new MouseAdapter() {
-			
-			public void mousePressed(MouseEvent em) {
-					
-				if(em.getClickCount() == 2){
-			//	JOptionPane.showMessageDialog(frmManagerScreen, "Double click !!");
-				
-				String IncToBeUpdated = tblTkts.getValueAt(tblTkts.getSelectedRow(), 0).toString().trim();
-				String IncToUpdateTitle = tblTkts.getValueAt(tblTkts.getSelectedRow(), 1).toString().trim();
-				
-				try{	
-					ProvideTktUpdate commentUpdateObj =new ProvideTktUpdate();
-					commentUpdateObj.updateIncident(IncToBeUpdated,IncToUpdateTitle,userLoggedInAs);
-					
-				}catch(Exception ex){
-					
-				}finally{
-					//frame.setVisible(true);
-				}
-				
-			}
-				
-		}
-		});
-		tblTkts.setForeground(new Color(65, 105, 225));
-		tblTkts.setFont(new Font("Verdana", Font.PLAIN, 14));
-		tblTkts.setBorder(new LineBorder(new Color(211, 211, 211), 2, true));
-		tblTkts.setToolTipText("Double Click on any row to provide update");
-		tblTkts.setBackground(new Color(255, 255, 240));
-		//change below..
-		tblTkts.setAutoResizeMode(JTable.WIDTH);
-		scrpnlTable.setViewportView(tblTkts);
 		//sending to table code starts here..
 		mgrIncBeanLs.clear();
 		try{
@@ -631,15 +598,33 @@ public class ManagerLandingPage extends JTable{
 	@SuppressWarnings({ })
 	private void displayTable(List<IncidentsBean> mgrIncBeanLs) {
 		
-		//Emptying the rows and columns to purge prvious table Settings.. 
+		//~~~~~~~
+		tblTkts = new JTable();
+		tblStyleObj = new WsrCustomTableStyle();
+		tblStyleObj.setWsrTableStandard(tblTkts,"TicketsTable");
+		
+		tblTkts.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent em) {
+					
+				listenForProvideUpdateEvent(em);
+			}
+		});
+		
+		scrpnlTable.setViewportView(tblTkts);
+		
+		//~~~~~~~
+		
+		//Emptying the rows and columns to purge previous table Settings.. 
 		dtm.setRowCount(0);
 		dtm.setColumnCount(0);
-		
+	    
 		tblTkts.setModel(dtm);
-		columnModel = tblTkts.getColumnModel();
+		tblTkts.setDefaultRenderer(Object.class, new WsrCustomCellStandard());
+		
 		header = tblTkts.getTableHeader();
-		header.setBackground(Color.BLUE);
-	    header.setForeground(Color.WHITE);
+		header.setDefaultRenderer(new WsrCustomHeaderRenderer(tblTkts,header));
+		
+		columnModel = tblTkts.getColumnModel();
 	    
 	    //Setting Column names..
 	    dtm.addColumn("Incident ID");
@@ -695,7 +680,29 @@ public class ManagerLandingPage extends JTable{
 	        if(sla.before(today) || ((int)((sla.getTime() - today.getTime())/(24*60*60*1000)) < 5)){
 			
 			
-			}
+	        }
 	        
+	}
+	
+	private void listenForProvideUpdateEvent(MouseEvent em) {
+		
+		if(em.getClickCount() == 2){
+			//	JOptionPane.showMessageDialog(frmManagerScreen, "Double click !!");
+				
+				String IncToBeUpdated = tblTkts.getValueAt(tblTkts.getSelectedRow(), 0).toString().trim();
+				String IncToUpdateTitle = tblTkts.getValueAt(tblTkts.getSelectedRow(), 1).toString().trim();
+				
+				try{	
+					ProvideTktUpdate commentUpdateObj =new ProvideTktUpdate();
+					commentUpdateObj.updateIncident(IncToBeUpdated,IncToUpdateTitle,userLoggedInAs);
+					
+				}catch(Exception ex){
+					
+				}finally{
+					//frame.setVisible(true);
+				}
+				
+			}
+		
 	}
 }
