@@ -152,7 +152,7 @@ public class ManagerLandingPage extends JTable{
 		userLoggedInAs= loggedUserBean.getRole();
 		
 		frmManagerScreen = new JFrame();
-		frmManagerScreen.setIconImage(Toolkit.getDefaultToolkit().getImage("\\Resources\\logo_passbook.png"));
+		frmManagerScreen.setIconImage(Toolkit.getDefaultToolkit().getImage(System.getProperty("user.dir")+"\\Develop\\Wsr Codebase\\Resources\\logo_passbook.png"));
 		frmManagerScreen.setForeground(new Color(255, 127, 80));
 		frmManagerScreen.setFont(new Font("Futura Medium", Font.BOLD | Font.ITALIC, 14));
 		frmManagerScreen.setTitle("Welcome " +loggedUserBean.getFirstName()+ " "+loggedUserBean.getLastName() +" !!");

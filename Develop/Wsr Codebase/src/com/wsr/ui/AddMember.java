@@ -12,6 +12,8 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import java.awt.Font;
+import java.awt.Toolkit;
+
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
@@ -73,6 +75,7 @@ public class AddMember {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 749, 644);
 		frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		frame.setIconImage(Toolkit.getDefaultToolkit().getImage(System.getProperty("user.dir")+"\\Develop\\Wsr Codebase\\Resources\\logo_passbook.png"));
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(255, 140, 0));

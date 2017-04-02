@@ -44,6 +44,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JTextArea;
 import javax.swing.JButton;
 import java.awt.SystemColor;
+import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
@@ -110,6 +111,7 @@ public class ProvideTktUpdate {
 		incInUserQueueList = (userLoggedInAs.equals("Admin")) ?  mgrController.getIncidentsOpenWithTeam() :  staffCntrlObj.getLoggedUserIncidentsInQueue();
 		System.out.println("check -- size : "+incInUserQueueList.size());
 		frame = new JFrame();
+		frame.setIconImage(Toolkit.getDefaultToolkit().getImage(System.getProperty("user.dir")+"\\Develop\\Wsr Codebase\\Resources\\logo_passbook.png"));
 		frame.getContentPane().addFocusListener(new FocusAdapter() {
 			
 		});

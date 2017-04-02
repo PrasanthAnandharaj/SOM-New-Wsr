@@ -17,6 +17,7 @@ import com.wsr.model.IncidentsBean;
 import javax.swing.JTable;
 
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.Window.Type;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -74,6 +75,7 @@ public class FilteredTicketsResult {
                                 }
                                 
                                 frame = new JFrame();
+                                frame.setIconImage(Toolkit.getDefaultToolkit().getImage(System.getProperty("user.dir")+"\\Develop\\Wsr Codebase\\Resources\\logo_passbook.png"));
                                 frame.setTitle("Your Filtered Results !");
                                 frame.setForeground(Color.LIGHT_GRAY);
                                 frame.setBackground(Color.PINK);

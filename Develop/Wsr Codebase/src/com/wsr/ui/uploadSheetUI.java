@@ -17,6 +17,7 @@ import java.text.ParseException;
 import java.awt.event.ActionEvent;
 import java.awt.Window.Type;
 import java.awt.Font;
+import java.awt.Toolkit;
 
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
@@ -64,6 +65,7 @@ public class uploadSheetUI {
 		frmUploadTicketSheets = new JFrame();
 		frmUploadTicketSheets.setType(Type.NORMAL);
 		frmUploadTicketSheets.setResizable(false);
+		frmUploadTicketSheets.setIconImage(Toolkit.getDefaultToolkit().getImage(System.getProperty("user.dir")+"\\Develop\\Wsr Codebase\\Resources\\logo_passbook.png"));
 		frmUploadTicketSheets.setTitle("Upload Ticket Sheets");
 		frmUploadTicketSheets.setBounds(100, 100, 450, 232);
 		frmUploadTicketSheets.getContentPane().setLayout(null);

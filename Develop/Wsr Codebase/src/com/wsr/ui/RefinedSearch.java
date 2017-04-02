@@ -16,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -96,6 +97,7 @@ public class RefinedSearch {
                               }
                               
                               frmRefinedSearch = new JFrame();
+                              frmRefinedSearch.setIconImage(Toolkit.getDefaultToolkit().getImage(System.getProperty("user.dir")+"\\Develop\\Wsr Codebase\\Resources\\logo_passbook.png"));
                               frmRefinedSearch.getContentPane().setBackground(new Color(128, 128, 128));
                               frmRefinedSearch.setTitle("Refined Search");
                               frmRefinedSearch.setResizable(false);

@@ -2,6 +2,7 @@ package com.wsr.ui;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.Window.Type;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -39,11 +40,11 @@ public class BussinessReviewSheet {
 	 */
 	public void BussinessReviewSheetUI() {
 		frame = new JFrame();
-		//frame.setBounds(100, 100, 704, 554);
 		frame.setType(Type.NORMAL);
 		frame.setResizable(false);
 		frame.setTitle("Update Tickets");
 		frame.setBounds(100, 100, 450, 232);
+		frame.setIconImage(Toolkit.getDefaultToolkit().getImage(System.getProperty("user.dir")+"\\Develop\\Wsr Codebase\\Resources\\logo_passbook.png"));
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
