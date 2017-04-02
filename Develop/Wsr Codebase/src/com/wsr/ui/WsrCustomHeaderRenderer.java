@@ -15,11 +15,20 @@ public class WsrCustomHeaderRenderer implements TableCellRenderer {
 	DefaultTableCellRenderer tblHeader;
 	public WsrCustomHeaderRenderer(JTable ticketsTbl, JTableHeader header) {
 		
-		tblHeader = (DefaultTableCellRenderer)ticketsTbl.getTableHeader().getDefaultRenderer();
-		tblHeader.setHorizontalAlignment(JLabel.CENTER);
-		header.setBackground(Color.decode("#f0f8ff"));
-		header.setForeground(Color.BLUE);
-		header.setFont(new Font("SansSerif", Font.BOLD, 14));
+		try{
+			tblHeader = new DefaultTableCellRenderer();
+			
+			tblHeader = (DefaultTableCellRenderer)ticketsTbl.getTableHeader().getDefaultRenderer();
+			tblHeader.setHorizontalAlignment(JLabel.CENTER);
+			header.setBackground(Color.decode("#f0f8ff"));
+			header.setForeground(Color.BLUE);
+			header.setFont(new Font("SansSerif", Font.BOLD, 14));
+	
+		}catch(Exception ex){	
+			
+			System.out.println("WsrCustomHeaderRenderer -- WsrCustomHeaderRenderer :: "+ex.getMessage());
+		}
+		
 	}
 	
 	@Override
