@@ -427,7 +427,7 @@ public class ProvideTktUpdate {
 				
 				int selectedRowIndex = updatesTbl.convertRowIndexToModel(updatesTbl.getSelectedRow());
 				//JOptionPane.showMessageDialog(frame, "Selected row is"+selectedRowIndex);
-				
+				frame.setCursor(waitCursor);
 				if(selectedRowIndex < 0){
 					JOptionPane.showMessageDialog(frame, "Please select a row to Invalidate..");
 				}else{
@@ -461,6 +461,7 @@ public class ProvideTktUpdate {
 							System.out.println("ProvideTktUpdate -- updateIncident :"+exp.getMessage());
 						}
 					}
+					frame.setCursor(defaultCursor);
 				}
 			}
 		});
