@@ -409,12 +409,12 @@ public class ProvideTktUpdate {
 					}else{
 						JOptionPane.showMessageDialog(frame, "Update Failure!! please contact Administrator", "Update Failed!", JOptionPane.ERROR_MESSAGE);
 					}	frame.setCursor(defaultCursor);		
-				}else
+				}else{
 					frame.setCursor(defaultCursor);
 					JOptionPane.showMessageDialog(frame, " Inputs missing..Please provide \""+inputValidations+"\" field");
 				}
-				
-			});
+			}
+		});
 		btnUpdate.setFont(new Font("Futura Medium", Font.BOLD, 14));
 		btnUpdate.setBackground(SystemColor.control);
 		btnUpdate.setBounds(1216, 215, 97, 25);
