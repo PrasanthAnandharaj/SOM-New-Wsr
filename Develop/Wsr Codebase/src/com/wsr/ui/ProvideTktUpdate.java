@@ -14,6 +14,7 @@ import javax.swing.border.EtchedBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -78,6 +79,9 @@ public class ProvideTktUpdate {
 	List<String> dropDownList = new ArrayList<>();
 	List<IncidentsBean> incInUserQueueList = null;
 	Map<String,String> provideUpdateInputsMap = null;
+	
+	private Cursor waitCursor = new Cursor(Cursor.WAIT_CURSOR);
+	private Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 	
 	private static String SUCCESS = "success";
 	private static String DEFAULTSELECTION = "~~Please Select~~";
@@ -389,6 +393,7 @@ public class ProvideTktUpdate {
 		btnUpdate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
+				frame.setCursor(waitCursor);
 				String inputValidations = updateFormValidation();
 				if(inputValidations.equalsIgnoreCase(SUCCESS)){
 					
@@ -403,11 +408,12 @@ public class ProvideTktUpdate {
 						JOptionPane.showMessageDialog(frame, "Comments Updated successfully !!", "Update Success!", JOptionPane.INFORMATION_MESSAGE);
 					}else{
 						JOptionPane.showMessageDialog(frame, "Update Failure!! please contact Administrator", "Update Failed!", JOptionPane.ERROR_MESSAGE);
-					}			
+					}	frame.setCursor(defaultCursor);		
 				}else
+					frame.setCursor(defaultCursor);
 					JOptionPane.showMessageDialog(frame, " Inputs missing..Please provide \""+inputValidations+"\" field");
 				}
-
+				
 			});
 		btnUpdate.setFont(new Font("Futura Medium", Font.BOLD, 14));
 		btnUpdate.setBackground(SystemColor.control);

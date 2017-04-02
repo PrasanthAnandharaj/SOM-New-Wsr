@@ -4,6 +4,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 
 import javax.swing.border.BevelBorder;
 import java.awt.Window.Type;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Toolkit;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
@@ -123,6 +125,8 @@ public class ManagerLandingPage extends JTable{
 	ManagerTasksController managerControllerObj = new ManagerTasksController();
 	StaffActivitiesController staffControllerObj = new StaffActivitiesController();
 	
+	private Cursor waitCursor = new Cursor(Cursor.WAIT_CURSOR);
+	private Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 	
 	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	JTableHeader header;
@@ -163,6 +167,7 @@ public class ManagerLandingPage extends JTable{
 		frmManagerScreen.setBounds(100, 100, 1400, 700);
 		frmManagerScreen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmManagerScreen.getContentPane().setLayout(null);
+		frmManagerScreen.setCursor(waitCursor);
 		
 		pnlMainPanel = new JPanel();
 		pnlMainPanel.setBorder(new BevelBorder(BevelBorder.LOWERED, new Color(211, 211, 211), new Color(169, 169, 169), new Color(169, 169, 169), new Color(211, 211, 211)));
@@ -573,10 +578,14 @@ public class ManagerLandingPage extends JTable{
 		//sending to table code starts here..
 		mgrIncBeanLs.clear();
 		try{
+			frmManagerScreen.setCursor(waitCursor);
 			mgrIncBeanLs = (userLoggedInAs.equals("Admin"))  ?managerControllerObj.getIncidentsOpenWithTeam() : staffControllerObj.getLoggedUserIncidentsInQueue();
 			displayTable(mgrIncBeanLs);
+			
 		}catch(Exception ex){
 				System.out.println("ManagerLandingPage :: diplayManagerPageUI -- "+ex.getMessage());
+		}finally{
+			frmManagerScreen.setCursor(defaultCursor);
 		}
 			
 		userPrivilegeFilter();
@@ -693,13 +702,14 @@ public class ManagerLandingPage extends JTable{
 				String IncToUpdateTitle = tblTkts.getValueAt(tblTkts.getSelectedRow(), 1).toString().trim();
 				
 				try{	
+					frmManagerScreen.setCursor(waitCursor);
 					ProvideTktUpdate commentUpdateObj =new ProvideTktUpdate();
 					commentUpdateObj.updateIncident(IncToBeUpdated,IncToUpdateTitle,userLoggedInAs);
 					
 				}catch(Exception ex){
 					
 				}finally{
-					//frame.setVisible(true);
+					frmManagerScreen.setCursor(defaultCursor);
 				}
 				
 			}
