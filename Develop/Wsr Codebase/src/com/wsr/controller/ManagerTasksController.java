@@ -188,6 +188,9 @@ public class ManagerTasksController {
 				tableValueMap  = new HashMap<>();
 				
 				for(int i=0;i<row.length;i++){
+					if(row[i].contains("\'")){
+						row[i] = row[i].replace("'", "\''");
+					}
 				tableValueMap.put(tableHeadingValueMap.get(i), row[i]);
 				}
 				

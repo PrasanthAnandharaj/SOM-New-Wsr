@@ -843,7 +843,12 @@ public class ProvideTktUpdate {
 		provideUpdateInputsMap.put("IssueIn", cmbCountry.getSelectedItem().toString().trim());
 		provideUpdateInputsMap.put("RootCause", cmbRootCause.getSelectedItem().toString().trim());
 		provideUpdateInputsMap.put("ClosureCode", cmbClosureCode.getSelectedItem().toString().trim());
-		provideUpdateInputsMap.put("Update", textAreaUpdate.getText().toString().trim());
+		System.out.println("+++ "+textAreaUpdate.getText().toString().trim());
+		String getText = textAreaUpdate.getText();
+		if(getText.contains("\'")){
+			getText = getText.replace("'", "\''");
+		}
+		provideUpdateInputsMap.put("Update", getText.toString().trim());
 		
 		return provideUpdateInputsMap;
 		
