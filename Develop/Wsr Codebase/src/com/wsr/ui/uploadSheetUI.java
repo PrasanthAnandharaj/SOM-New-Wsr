@@ -12,7 +12,7 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.awt.event.ActionEvent;
 import java.awt.Window.Type;
@@ -126,26 +126,24 @@ public class uploadSheetUI {
 		btnPopulate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
-				boolean updateFlag = false;
+				boolean operationFeedbackVal = false;
 				try{
 					reader = new CSVReader(new FileReader(selectedFileLocation));
 					
 					// Passing the reader value to controller
 					
-					 updateFlag = managerTaskController.IterateThroughOpenSheet(reader);
+					operationFeedbackVal = managerTaskController.IterateThroughOpenSheet(reader);
 					
 				}
 				catch (FileNotFoundException e) {
 		                System.err.println(e.getMessage());
-		        }
-		        catch (IOException e) {
-		                System.err.println(e.getMessage());
-		        }
-				catch (ParseException e) {
+		        }catch (ParseException e) {
 						System.err.println(e.getMessage());
+				} catch (SQLException e) {
+					System.err.println(e.getMessage());
 				}
 				
-				if(updateFlag){
+				if(operationFeedbackVal){
 					
 					JOptionPane.showMessageDialog(frmUploadTicketSheets, "Sheet Uploaded Successfuly", "uploaded", JOptionPane.INFORMATION_MESSAGE);
 				}

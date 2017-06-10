@@ -27,12 +27,12 @@ public class ManagerActivitiesDaoHelper {
 
 	public String getOpenTicketsInTeamQuery() {
 		
-		return "Select distinct * from dbo.vTestTempTable where (Status <> \'BAM : Closed\' AND SM7Status <> \'Closed\' AND IsUpdated <> \'\')";
+		return "Select distinct * from dbo.vTestTempTable where (Status <> \'BAM : Closed\' AND SM7Status <> \'Closed\' AND IsUpdated <> \'\') Order By SLATargetDate Asc";
 	}
 
 	public String getSelectedMemberOpenTickets(String selectedMember) {
 		
-		return "Select distinct * from vOpenTicketsQueue where Assignee = \'"+selectedMember+"\'";
+		return "Select distinct * from vOpenTicketsQueue where Assignee = \'"+selectedMember+"\' Order By SLATargetDate Asc";
 	}
 
 	public String generateFilterQuery(Map<String, List<String>> searchFilterCriteriaMap, List<String[]> filterFieldsUtilLs) {
@@ -43,6 +43,7 @@ public class ManagerActivitiesDaoHelper {
 		String fromDateSelected = searchFilterCriteriaMap.get("SelectedDates").get(0);
 		String tillDateSelected = searchFilterCriteriaMap.get("SelectedDates").get(1);
 		
+		@SuppressWarnings("rawtypes")
 		ListIterator filterLsIter =  filterFieldsUtilLs.listIterator();
 		int index = 0;
 		while(filterLsIter.hasNext()){
@@ -171,7 +172,6 @@ public String getBasicCommentUpdateQuery(List<IncidentsBean> incBeanLs, int list
 	    String updatedDate= dateFormat.format(date);
 	    String update = "Investigation in progress";
 	    String actionOn = incBeanLs.get(listCount).getAssignee();
-	    String satusID = "2";
 	    String isValid = "1";
 	    String updatedBy = "Auto";
 		//String query = "INSERT INTO dbo.HistoricActivities VALUES(\'"+ incidentID +"\',\'"+satusID+"\',\'"+actionOn+"\',\'"+ update + "\',\'"+ updatedDate + "\',\'"+ updatedBy + "\',\'"+ isValid+"\')";

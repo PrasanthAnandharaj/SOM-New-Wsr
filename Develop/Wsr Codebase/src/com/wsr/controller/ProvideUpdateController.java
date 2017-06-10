@@ -7,8 +7,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.wsr.dao.StaffActivitiesDao;
 import com.wsr.dao.StaffActivitiesDaoHelper;
+import com.wsr.dao.WsrDbAccessor;
 import com.wsr.model.IncidentsBean;
 import com.wsr.model.TicketUpdateBean;
 
@@ -26,7 +26,7 @@ public class ProvideUpdateController {
 	
 	IncidentsBean incBeanObj;
 	TicketUpdateBean tktUpdateObj = new  TicketUpdateBean();
-	StaffActivitiesDao staffDaoObj = new StaffActivitiesDao();
+	WsrDbAccessor dbAccessorObj = new WsrDbAccessor();
 	StaffActivitiesDaoHelper staffDaoHelperObj = new StaffActivitiesDaoHelper();
 	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
@@ -48,7 +48,12 @@ public class ProvideUpdateController {
 					break;
 			}
 			System.out.println("DaoQuery is "+daoQuery);
-			controllerRs = staffDaoObj.getAllStatusOption(daoQuery);
+
+			long startTime3  = System.currentTimeMillis();
+			controllerRs = dbAccessorObj.queryToDb(daoQuery);
+			long stopTime3 = System.currentTimeMillis();
+			System.out.println("Time taken for CTRL Status Drop down : "+ (float)(stopTime3 - startTime3)/1000 + " seconds");
+			
 			if(controllerRs.next() == true){
 				do{		
 					if(dropDownField.equals("Status")){
@@ -75,7 +80,7 @@ public class ProvideUpdateController {
 		boolean invalidateSuccessFlag = false;
 		try{
 			daoQuery = staffDaoHelperObj.getInvalidateAnUpdate(updateIdToInvalidate);
-			int rowAffected = staffDaoObj.invalidateSelectedComment(daoQuery);
+			int rowAffected = dbAccessorObj.performCudIntoDb(daoQuery);
 			invalidateSuccessFlag = (rowAffected == 1) ? true : false;
 			System.out.println("Invalidate Success Flag returned :"+invalidateSuccessFlag);
 		}catch(Exception e){
@@ -94,14 +99,14 @@ public class ProvideUpdateController {
 		try{
 			
 			String progressUpdateQuery = staffDaoHelperObj.getProgressUpdateQuery(tktUpdateObj);
-			int insertFeedBack = staffDaoObj.insertProgressiveComment(progressUpdateQuery);
+			int insertFeedBack = dbAccessorObj.performCudIntoDb(progressUpdateQuery);
 			if(insertFeedBack == oneRowAffected){
 			
 				incBeanObj = new IncidentsBean();
 				incBeanObj = setIncidentsBeanForProvieUpdate(provideUpdateUtilMap,incBeanObj);
 				String updateInIncidentsQuery = staffDaoHelperObj.getProgressiveUpdateInIncidentQuery(incBeanObj);
 				System.out.println(updateInIncidentsQuery);
-				int updateFeedBack = staffDaoObj.UpdateIncidentForComment(updateInIncidentsQuery);
+				int updateFeedBack = dbAccessorObj.performCudIntoDb(updateInIncidentsQuery);
 				if(updateFeedBack == oneRowAffected){
 					controllerFeedBack =  true;
 				}else{

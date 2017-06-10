@@ -130,7 +130,7 @@ public class RefinedSearch {
                               pnlMemberSelection.setLayout(new BoxLayout(pnlMemberSelection, BoxLayout.Y_AXIS));
                               
                               searchUtilLs.clear();
-                              searchUtilLs = commonControllerObj.getAllMembers();
+                              searchUtilLs = commonControllerObj.fetchFromDB("AllMembers",null);
                               System.out.println("checkbox member size :"+searchUtilLs.size());
                               checkBoxList = new JCheckBox[searchUtilLs.size()+1];
                               for(int i=0;i<searchUtilLs.size();i++){
@@ -385,7 +385,7 @@ public class RefinedSearch {
                               tillEditor.setEditable(false);
                               
                               searchUtilLs.clear();
-                              searchUtilLs = commonControllerObj.getAllDomains();
+                              searchUtilLs = commonControllerObj.fetchFromDB("AllDomains",null);
                               if(searchUtilLs != null){    
                                              //adding the display to select..default option..
                                              vctDomain.add("Please select a Domain");
@@ -405,7 +405,7 @@ public class RefinedSearch {
                                                                            if(!(selectedDomainCheckBox.getText().toString().contains("Select"))){
                                                                                           System.out.println("2");                                                              
                                                                                           searchUtilLs.clear();
-                                                                                          searchUtilLs = commonControllerObj.getDomainToSubDomainMap(selectedDomainCheckBox.getText().toString());
+                                                                                          searchUtilLs = commonControllerObj.fetchFromDB("DomainToSubDomainMap",selectedDomainCheckBox.getText().toString());
                                                                                           if(searchUtilLs.size() > 0){
                                                                                           ccbSubDomain.removeAllItems();
                                                                                           ccbSubDomain.addItem("Select Domain");
@@ -542,7 +542,7 @@ public class RefinedSearch {
                               
                               vctRtCaus.add("Please Select a Root Cause");
                               searchUtilLs.clear();
-                              searchUtilLs = commonControllerObj.getAllRootCause();
+                              searchUtilLs = commonControllerObj.fetchFromDB("AllRootCause",null);
                               searchUtilLs.add(0, "Select Root Cause");
                               for(int i=0;i<searchUtilLs.size();i++){
                                              vctRtCaus.add(new JCheckBox(searchUtilLs.get(i),false));
@@ -587,7 +587,7 @@ public class RefinedSearch {
                               pnlParams.add(ccbRootCause);
                               
                               searchUtilLs.clear();
-                              searchUtilLs = commonControllerObj.getAllCountries();
+                              searchUtilLs = commonControllerObj.fetchFromDB("AllCountries",null);
                               vctCountry.add("Please Select a Country");
                               for(int i=0;i<searchUtilLs.size();i++){
                                              vctCountry.add(new JCheckBox(searchUtilLs.get(i),false));
@@ -635,7 +635,6 @@ public class RefinedSearch {
                               btnListTickets = new JButton("List Tickets");
                               btnListTickets.setForeground(new Color(148, 0, 211));
                               btnListTickets.addActionListener(new ActionListener() {
-                                             @SuppressWarnings("static-access")
                                              public void actionPerformed(ActionEvent e) {
                                                             
                                                             if(dtChsrFromDate.getDate() != null && dtChsrTillDate != null){

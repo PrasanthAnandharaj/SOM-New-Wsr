@@ -34,22 +34,23 @@ import java.awt.event.MouseEvent;
 public class MemberManagementScreen {
 
 	private JFrame frame;
+	@SuppressWarnings("rawtypes")
+	private JComboBox cmbRole;
 	private JTable tblMemberDet;
+	private JTextField txtEmail;
+	private JTextField txtUserid;
+	private JTextField txtAliasId;
+	private JTextField txtLastname;
+	private JTextField txtFirstname;
+	private JTextField txtContactnum;
 	
 	MemberManagementController memberController = new MemberManagementController();
-	
-	private JTextField txtUserid;
-	private JTextField txtFirstname;
-	private JTextField txtLastname;
-	private JTextField txtEmail;
-	private JComboBox cmbRole;
-	private JTextField txtContactnum;
-	private JTextField txtAliasId;
 
 	/**
 	 * @param userLoggedInAs 
 	 * @wbp.parser.entryPoint
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void displayMemberManagementScreen(String userLoggedInAs) {
 		
 		try {
@@ -249,7 +250,7 @@ public class MemberManagementScreen {
 						
 						if(checkInputs(addMemberInputDetails) == true){
 				
-							boolean insertSuccess = memberController.addMember(addMemberInputDetails);
+							boolean insertSuccess = memberController.addOrUpdateMember("AddMember",addMemberInputDetails);
 							if(insertSuccess == true){
 							
 								displayDefaultTable();
@@ -299,7 +300,7 @@ public class MemberManagementScreen {
 						
 						try{
 							
-							boolean updateSuccess = memberController.editMember(editMemberList);
+							boolean updateSuccess = memberController.addOrUpdateMember("EditMember",editMemberList);
 							if(updateSuccess == true){
 								
 								displayDefaultTable();

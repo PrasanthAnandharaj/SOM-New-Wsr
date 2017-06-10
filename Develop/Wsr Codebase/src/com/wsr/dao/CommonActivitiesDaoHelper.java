@@ -9,7 +9,7 @@ public class CommonActivitiesDaoHelper {
 	
 	public String getAllMembersQuery() {
 		
-		return "Select * from dbo.Profiles where RoleID <> 1";
+		return "Select UserID from dbo.Profiles where RoleID <> 1";
 	}
 	
 	public String getSearchByKeywordQuery(String searchKey) {
@@ -20,15 +20,15 @@ public class CommonActivitiesDaoHelper {
 	
 	public String getAllDomainOptions() {
 		
-		return "Select * from dbo.vDomains";
+		return "Select DomainName from dbo.vDomains";
 	}
 
 	public String getAllSubDomainOptions() {
 		
-		return "Select * from dbo.vSubDomains";
+		return "Select SubDomain from dbo.vSubDomains";
 	}
 
-	public String getDomainIdQuery(String selectedDomain) {
+/*	public String getDomainIdQuery(String selectedDomain) {
 		
 		return "Select DomainId from dbo.vDomains where DomainName = \'" +selectedDomain+ "\'";
 	}
@@ -36,16 +36,24 @@ public class CommonActivitiesDaoHelper {
 	public String getSubDomainListQuery(String domainId) {
 		System.out.println();
 		return "Select SubDomain from dbo.vSubDomains where subDomainID like \'" + domainId + "%\'";
-	}
+	}*/
 
 	public String getAllRootCauseQuery() {
 		
-		return "Select * from dbo.vRootCause";
+		return "Select RootCause from dbo.vRootCause";
 	}
 
 	public String getAllCountriesQuery() {
 		
-		return "Select * from dbo.vUpdateCountry";
+		return "Select CountryName from dbo.vUpdateCountry";
+	}
+	
+	public String getDomainToSubDomainMappingQuery(String forDomain){
+		
+		return "SELECT Distinct a.SubDomain"
+				+ " FROM dbo.vSubDomains a"
+				+ " JOIN vDomains b ON a.SubDomainID"
+				+ " LIKE CONCAT((Select DomainId from dbo.vDomains where DomainName =\'"+forDomain+"\'),\'%\')";
 	}
 
 }

@@ -83,6 +83,7 @@ public class ProvideTktUpdate {
 	private Cursor waitCursor = new Cursor(Cursor.WAIT_CURSOR);
 	private Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 	
+	long startTime,stopTime;
 	private static String SUCCESS = "success";
 	private static String DEFAULTSELECTION = "~~Please Select~~";
 	private static String STATUSCLOSED = "BAM : Closed";
@@ -96,7 +97,7 @@ public class ProvideTktUpdate {
 	@SuppressWarnings("unchecked")
 	void updateIncident(final String calledIncId,final String calledIncTitle, final String userLoggedInAs) {
 		
-		
+		startTime  = System.currentTimeMillis();
 		try {
 		    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 		    	System.out.println(info.getName());
@@ -113,7 +114,7 @@ public class ProvideTktUpdate {
 		
 		incInUserQueueList = new ArrayList<>();
 		incInUserQueueList.clear();
-		incInUserQueueList = (userLoggedInAs.equals("Admin")) ?  mgrController.getIncidentsOpenWithTeam() :  staffCntrlObj.getLoggedUserIncidentsInQueue();
+		incInUserQueueList = (userLoggedInAs.equals("Admin")) ?  commCntrlObj.searchIncidents("IncidentsOpenWithTeam",null) :  commCntrlObj.searchIncidents("LoggedUserIncidentsInQueue",null);
 		System.out.println("check -- size : "+incInUserQueueList.size());
 		frame = new JFrame();
 		frame.setIconImage(Toolkit.getDefaultToolkit().getImage(System.getProperty("user.dir")+"\\Develop\\Wsr Codebase\\Resources\\logo_passbook.png"));
@@ -170,6 +171,8 @@ public class ProvideTktUpdate {
 
 						//removing the existing tab from the tab panel first..
 						tbpTktView.remove(0);
+						//Clearing the Update TextArea for old ticket..
+						textAreaUpdate.setText("");
 						ShowTktUpdatesInTab(incidentToBeOpenedUpdates);
 						diplaySuggestedInicidentsTable(incidentIdToBeClosed,incidentTitleToBeClosed,userLoggedInAs);
 						loadUpdatePanelWithTktDetails(incidentToBeOpenedUpdates);
@@ -215,8 +218,9 @@ public class ProvideTktUpdate {
 		
 		txtTicketId = new JTextField();
 		txtTicketId.setBackground(new Color(250, 235, 215));
-		txtTicketId.setBounds(165, 40, 202, 22);
+		txtTicketId.setBounds(165, 40, 300, 22);
 		pnlInputsForUpdates.add(txtTicketId);
+		txtTicketId.setEnabled(false);
 		txtTicketId.setColumns(10);
 		
 		JLabel lblDomain = new JLabel("Domain");
@@ -234,7 +238,11 @@ public class ProvideTktUpdate {
 		pnlInputsForUpdates.add(lblSeperatorDomain);
 		
 		dropDownList.clear();
-		dropDownList = commCntrlObj.getAllDomains();
+		long startTime1  = System.currentTimeMillis();
+		dropDownList = commCntrlObj.fetchFromDB("AllDomains",null); 
+		long stopTime1 = System.currentTimeMillis();
+		System.out.println("Time taken for Domain Drop down : "+ (float)(stopTime1 - startTime1)/1000 + " seconds");
+		
 		dropDownList.add(0, DEFAULTSELECTION);
 		
 		cmbDomain = new JComboBox(dropDownList.toArray());
@@ -246,7 +254,7 @@ public class ProvideTktUpdate {
 				String selectedOpt = cmbDomain.getSelectedItem().toString();
 				if(!selectedOpt.contains("Select")){
 				
-					dropDownList = commCntrlObj.getDomainToSubDomainMap(cmbDomain.getSelectedItem().toString().trim());				
+					dropDownList = commCntrlObj.fetchFromDB("DomainToSubDomainMap",cmbDomain.getSelectedItem().toString().trim());				
 					dropDownList.add(0, DEFAULTSELECTION);
 					cmbSubDomain.removeAllItems();
 					for( String optionVal : dropDownList ){
@@ -259,7 +267,7 @@ public class ProvideTktUpdate {
 		cmbDomain.setForeground(new Color(0, 0, 0));
 		cmbDomain.setMaximumRowCount(40);
 		cmbDomain.setFont(new Font("Verdana", Font.PLAIN, 14));
-		cmbDomain.setBounds(165, 112, 202, 22);
+		cmbDomain.setBounds(165, 112, 300, 22);
 		pnlInputsForUpdates.add(cmbDomain);
 		
 		JLabel lblSeperatorActionOn = new JLabel(":");
@@ -297,10 +305,17 @@ public class ProvideTktUpdate {
 		pnlInputsForUpdates.add(lblSeperatorClosureCode);
 		
 		dropDownList.clear();
-		dropDownList = provideUpdateObj.getdropDownOptionsAsList("ClosureCode");
+		
+		long startTime2  = System.currentTimeMillis();
+		dropDownList = provideUpdateObj.getdropDownOptionsAsList("ClosureCode"); //2
+		long stopTime2 = System.currentTimeMillis();
+		System.out.println("Time taken for CLsCode Drop down : "+ (float)(stopTime2 - startTime2)/1000 + " seconds");
+		
+		
 		dropDownList.add(DEFAULTSELECTION);
 		cmbClosureCode = new JComboBox();
 		cmbClosureCode.setModel(new DefaultComboBoxModel());
+		
 		for(int clsrcodeIter = 0; clsrcodeIter < dropDownList.size(); clsrcodeIter++){
 			cmbClosureCode.addItem(dropDownList.get(clsrcodeIter).trim());
 		}
@@ -313,7 +328,12 @@ public class ProvideTktUpdate {
 		
 		//Clearing the Obj before getting the List from DB..
 				dropDownList.clear();
-				dropDownList = provideUpdateObj.getdropDownOptionsAsList("Status");
+				
+			long startTime3  = System.currentTimeMillis();
+			dropDownList = provideUpdateObj.getdropDownOptionsAsList("Status");//3
+			long stopTime3 = System.currentTimeMillis();
+			System.out.println("Time taken for Status Drop down : "+ (float)(stopTime3 - startTime3)/1000 + " seconds");
+								
 				dropDownList.add(DEFAULTSELECTION);
 				cmbStatus = new JComboBox();
 				cmbStatus.addActionListener(new ActionListener() {
@@ -335,7 +355,7 @@ public class ProvideTktUpdate {
 				cmbStatus.setMaximumRowCount(40);
 				cmbStatus.setForeground(new Color(0, 0, 0));
 				cmbStatus.setFont(new Font("Verdana", Font.PLAIN, 14));
-				cmbStatus.setBounds(597, 40, 202, 22);
+				cmbStatus.setBounds(597, 40, 300, 22);
 				pnlInputsForUpdates.add(cmbStatus);
 		
 		
@@ -354,14 +374,19 @@ public class ProvideTktUpdate {
 		pnlInputsForUpdates.add(lblSeperatorRootCause);
 		
 		dropDownList.clear();
-		dropDownList = commCntrlObj.getAllRootCause();
+		
+		long startTime4  = System.currentTimeMillis();
+		dropDownList = commCntrlObj.fetchFromDB("AllRootCause",null);
+		long stopTime4 = System.currentTimeMillis();
+		System.out.println("Time taken for  RootCause Drop down : "+ (float)(stopTime4 - startTime4)/1000 + " seconds");
+		
 		dropDownList.add(DEFAULTSELECTION);
 		cmbRootCause = new JComboBox(dropDownList.toArray());
 		cmbRootCause.setSelectedItem(DEFAULTSELECTION);
 		cmbRootCause.setMaximumRowCount(40);
 		cmbRootCause.setForeground(new Color(0, 0, 0));
 		cmbRootCause.setFont(new Font("Verdana", Font.PLAIN, 14));
-		cmbRootCause.setBounds(597, 183, 202, 22);
+		cmbRootCause.setBounds(597, 183, 300, 22);
 		pnlInputsForUpdates.add(cmbRootCause);
 		
 		JLabel lblUpdate = new JLabel("Update");
@@ -406,9 +431,13 @@ public class ProvideTktUpdate {
 						tbpTktView.remove(0);
 						ShowTktUpdatesInTab(tabToRefresh);
 						JOptionPane.showMessageDialog(frame, "Comments Updated successfully !!", "Update Success!", JOptionPane.INFORMATION_MESSAGE);
+						textAreaUpdate.setText("");
 					}else{
 						JOptionPane.showMessageDialog(frame, "Update Failure!! please contact Administrator", "Update Failed!", JOptionPane.ERROR_MESSAGE);
 					}	frame.setCursor(defaultCursor);		
+					//Clearing the Update TextArea for old ticket..
+					textAreaUpdate.setText("");
+					
 				}else{
 					frame.setCursor(defaultCursor);
 					JOptionPane.showMessageDialog(frame, " Inputs missing..Please provide \""+inputValidations+"\" field");
@@ -492,7 +521,7 @@ public class ProvideTktUpdate {
 		cmbSubDomain.setMaximumRowCount(40);
 		cmbSubDomain.setForeground(Color.BLACK);
 		cmbSubDomain.setFont(new Font("Verdana", Font.PLAIN, 14));
-		cmbSubDomain.setBounds(165, 183, 202, 22);
+		cmbSubDomain.setBounds(165, 183, 300, 22);
 		
 		pnlInputsForUpdates.add(cmbSubDomain);
 		
@@ -511,13 +540,18 @@ public class ProvideTktUpdate {
 		pnlInputsForUpdates.add(lblIssueInColon);
 		
 		dropDownList.clear();
-		dropDownList = commCntrlObj.getAllCountries();
+		
+		long startTime5  = System.currentTimeMillis();
+		dropDownList = commCntrlObj.fetchFromDB("AllCountries",null);
+		long stopTime5 = System.currentTimeMillis();
+		System.out.println("Time taken for Country Drop down : "+ (float)(stopTime5 - startTime5)/1000 + " seconds");
+		
 		dropDownList.add(DEFAULTSELECTION);
 		cmbCountry = new JComboBox(dropDownList.toArray());
 		cmbCountry.setMaximumRowCount(40);
 		cmbCountry.setForeground(Color.BLACK);
 		cmbCountry.setFont(new Font("Verdana", Font.PLAIN, 14));
-		cmbCountry.setBounds(597, 112, 202, 22);
+		cmbCountry.setBounds(597, 112, 300, 22);
 		cmbCountry.setSelectedItem(DEFAULTSELECTION);
 		pnlInputsForUpdates.add(cmbCountry);
 		
@@ -538,10 +572,24 @@ public class ProvideTktUpdate {
 	//	tbpTktView.getTabComponentAt(1).setVisible(true);
 		
 		tbpTktView.setSelectedIndex(1);*/
+		stopTime = System.currentTimeMillis();
+		System.out.println("Time taken for Initial : "+ (float)(stopTime - startTime)/1000 + " seconds");
 		
+		
+		startTime  = System.currentTimeMillis();
 		ShowTktUpdatesInTab(calledIncId);
+		stopTime = System.currentTimeMillis();
+		System.out.println("Time taken for Loading Update tab : "+ (float)(stopTime - startTime)/1000 + " seconds");
+		
+		startTime  = System.currentTimeMillis();
 		diplaySuggestedInicidentsTable(null,null,userLoggedInAs);
+		stopTime = System.currentTimeMillis();
+		System.out.println("Time taken for Loading Suggestion table : "+ (float)(stopTime - startTime)/1000 + " seconds");
+		
+		startTime  = System.currentTimeMillis();
 		loadUpdatePanelWithTktDetails(calledIncId);
+		stopTime = System.currentTimeMillis();
+		System.out.println("Time taken for Loading selection tab : "+ (float)(stopTime - startTime)/1000 + " seconds");
 		
 		//Finally showing the screen
 		frame.setVisible(true);
@@ -556,7 +604,7 @@ public class ProvideTktUpdate {
 		try{
 			
 			incList = new ArrayList<>();
-			incList = (userLoggedInAs.equals("Admin")) ?  mgrController.getIncidentsOpenWithTeam() :  staffCntrlObj.getLoggedUserIncidentsInQueue();
+			incList = (userLoggedInAs.equals("Admin")) ?  commCntrlObj.searchIncidents("IncidentsOpenWithTeam",null) :  commCntrlObj.searchIncidents("LoggedUserIncidentsInQueue",null);
 			
 			if(closedTabId != null){
 			
@@ -647,7 +695,6 @@ public class ProvideTktUpdate {
 				//adding the ticket name to Editing ticket name..
 				String openingTktId = tbpTktView.getTitleAt(0);
 				txtTicketId.setText(openingTktId);
-				txtTicketId.setEnabled(false);
 				loadUpdatePanelWithTktDetails(openingTktId);
 				
 				
@@ -666,7 +713,7 @@ public class ProvideTktUpdate {
 	private JPanel showUpdatesInTable(List<TicketUpdateBean> ticketHistoryLs) {
 		
 		pnlInsideTab = new JPanel();
-		pnlInsideTab.setLayout(new BorderLayout());		
+		pnlInsideTab.setLayout(new BorderLayout());
 		scrpnlInsideTab = new JScrollPane();
 		
 		updatesTbl = new JTable();
@@ -701,7 +748,7 @@ public class ProvideTktUpdate {
 			System.out.println("ProvideTktUpdate -- showUpdatesInTable :"+exp.getMessage());
 		}
 		
-		scrpnlInsideTab.setViewportView(updatesTbl);		
+		scrpnlInsideTab.setViewportView(updatesTbl);
 		pnlInsideTab.add(scrpnlInsideTab,BorderLayout.CENTER);
 		
 		return pnlInsideTab;
@@ -742,7 +789,7 @@ public class ProvideTktUpdate {
 		
 		incInUserQueueList.clear();
 		
-		incInUserQueueList = commCntrlObj.searchIncById(selectedTktId);
+		incInUserQueueList = commCntrlObj.searchIncidents("SearchIncById",selectedTktId);
 		if(!incInUserQueueList.isEmpty()){
 	//		System.out.println("ticket title :"+incInUserQueueList.get(0).getIncidentID()+ "--" +incInUserQueueList.get(0).getupdateCountryName()+"--"+incInUserQueueList.get(0).getdomainName());
 		

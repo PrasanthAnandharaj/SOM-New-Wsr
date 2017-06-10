@@ -8,9 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.wsr.dao.CommonActivitiesDao;
+import com.wsr.dao.WsrDbAccessor;
 import com.wsr.dao.CommonActivitiesDaoHelper;
-import com.wsr.dao.ManagerActivitiesDao;
 import com.wsr.dao.ManagerActivitiesDaoHelper;
 import com.wsr.dao.StaffActivitiesDaoHelper;
 import com.wsr.model.IncidentsBean;
@@ -21,85 +20,61 @@ public class CommonTasksController {
 	IncidentsBean tempBean;
 	ResultSet commonTasksRs;
 	IncidentsBean incidentBean = new IncidentsBean();
+	
 	List<String> commonUtilLs = new ArrayList<String>();
 	List<Integer> commonIntegerLs = new ArrayList<Integer>();
-	ManagerActivitiesDao mgrDoaObj = new ManagerActivitiesDao();
-	CommonActivitiesDao commonDaoObj = new CommonActivitiesDao();
-	StaffActivitiesDaoHelper staffDaoHelperObj = new StaffActivitiesDaoHelper();
-	ManagerActivitiesDaoHelper managerDaoHelper = new ManagerActivitiesDaoHelper();
 	List<IncidentsBean> incBeanLs = new ArrayList<IncidentsBean>();
-	CommonActivitiesDaoHelper commonHelperObj = new CommonActivitiesDaoHelper();
+	
 	Map<String, List<String>> commonUtilMap = new HashMap<String, List<String>>();
+	
+	WsrDbAccessor dbAccessorObj = new WsrDbAccessor();
+	StaffActivitiesDaoHelper staffDaoHelperObj = new StaffActivitiesDaoHelper();
+	CommonActivitiesDaoHelper commonHelperObj = new CommonActivitiesDaoHelper();
+	ManagerActivitiesDaoHelper managerDaoHelper = new ManagerActivitiesDaoHelper();
 
-	public List<String> getAllMembers() {
+	//configure this..
+	public List<String> fetchFromDB(String queryType,String selectedVal) {
 		
+		String daoQuery="";
 		commonTasksRs = null;
 		commonUtilLs.clear();	
-		String all_members_query = commonHelperObj.getAllMembersQuery();
 		
+		daoQuery = (queryType.equals("DomainToSubDomainMap")) ?	
+								dbQueryRouter(queryType,selectedVal) :	dbQueryRouter(queryType, null);
 		try{
-			commonTasksRs = commonDaoObj.getAllMembers(all_members_query);
+			System.out.println("Ctrlr calling for method : "+queryType+"query :"+daoQuery);
+			commonTasksRs = dbAccessorObj.queryToDb(daoQuery);
 			while(commonTasksRs.next()){
-				commonUtilLs.add(commonTasksRs.getString("UserID"));
+				//As all queries returns the required data at first index starting 1..
+				commonUtilLs.add(commonTasksRs.getString(1));
 			}
 		}catch(Exception ex){
-			System.out.println("CommonTasksController :: getAllMembers -- "+ex.getMessage());
+			System.out.println("CommonTasksController :: fetchFromDB -- "+ex.getMessage());
 		}finally{	
 			return commonUtilLs;
-		}
-		
+		}	
 	}
 
-	public List<IncidentsBean> searchIncById(String searchId) {
+	public List<IncidentsBean> searchIncidents(String searchCriteria,String searchVal) {
 		
 		commonTasksRs = null;
 		tempBean = null;
 		incBeanLs.clear();
-		String search_by_Inc_ID_Query = commonHelperObj.getSearchByIncIdQuery(searchId);
+		String daoQuery = "";
 		
-		try{
-			
-			commonTasksRs = commonDaoObj.searchByIncidentID(search_by_Inc_ID_Query);
+		daoQuery = dbQueryRouter(searchCriteria, searchVal);
+		try{		
+			commonTasksRs = dbAccessorObj.queryToDb(daoQuery);
 			while(commonTasksRs.next()){
 				tempBean = new IncidentsBean();
-				tempBean = setIncidentBean(commonTasksRs,tempBean,"searchIncById");
+				tempBean = setIncidentBean(commonTasksRs,tempBean,searchCriteria);
 				incBeanLs.add(tempBean);
-			}
-			
+			}		
 		}catch(Exception ex){
-			System.out.println("CommonTasksController :: searchIncById -- "+ex.getMessage());
+			System.out.println("CommonTasksController :: searchIncidents -- "+ex.getMessage());
 		}finally{	
 			return incBeanLs;
 		}
-	}
-	
-	public List<IncidentsBean> searchTicketByKeyword(String searchKey) {
-		
-		ResultSet searchByKeyRs = null;
-		tempBean = null;
-		incBeanLs.clear();
-		
-		try{
-			
-			searchByKeyRs = commonDaoObj.searchTicketByKeyword(commonHelperObj.getSearchByKeywordQuery(searchKey));
-			if(searchByKeyRs.next() == true){
-				
-				do{
-					tempBean =  new IncidentsBean();
-					tempBean = setIncidentBean(searchByKeyRs, tempBean, "searchTicketByKeyword");
-					incBeanLs .add(tempBean);
-					
-				}while(searchByKeyRs.next() == true);
-			}else{
-				System.out.println("CommonTasksController :: getIncidentsOpenWithTeam -- No ticket with searched keyword in DB !!");
-			}
-			
-		}catch(Exception ex){
-			
-		System.out.println("CommonTasksController -- searchTicketByKeyword :"+ex.getMessage());
-			
-		}
-		return incBeanLs;
 	}
 	
 	public List<Integer> getTicketStatistics(String userLoggedInAs, String loggedUserId) {
@@ -112,62 +87,112 @@ public class CommonTasksController {
 		String total_ticket_count_query = (userLoggedInAs.equals("Admin")) ? managerDaoHelper.getTotalTktCountQuery() 
 												: staffDaoHelperObj.getTotalTktHandledCountQuery(loggedUserId) ;
 		String open_ticket_count = (userLoggedInAs.equals("Admin")) ? managerDaoHelper.getOpenTicketCountQuery()
-												: staffDaoHelperObj.getOpenTicketCountQuery(loggedUserId);
-		
+												: staffDaoHelperObj.getOpenTicketCountQuery(loggedUserId);	
 		try{
-			commonTasksRs = mgrDoaObj.getTotalTicketCount(total_ticket_count_query);
-			
+			commonTasksRs = dbAccessorObj.queryToDb(total_ticket_count_query);
 			while(commonTasksRs.next()){
-
 				ttlTktCount = commonTasksRs.getInt("TotalCount");
-				commonIntegerLs.add(ttlTktCount);
-				
+				commonIntegerLs.add(ttlTktCount);				
 			}
 			commonTasksRs=null;
-			commonTasksRs = mgrDoaObj.getOpenTicketsCount(open_ticket_count);
-			
+			commonTasksRs = dbAccessorObj.queryToDb(open_ticket_count);
 			while(commonTasksRs.next()){
-				
 				openTktCount = commonTasksRs.getInt("OpenCount");
 				commonIntegerLs.add(openTktCount);
-			}
-			
+			}		
 		}catch(Exception ex){
 			System.out.println("CommonTasksController :: getTicketStatistics -- "+ex.getMessage());
-		}finally{
-		
+		}finally{		
 			return commonIntegerLs;
 		}
 	}
-	
-	public List<String> getAllDomains() {
 
-		commonTasksRs = null;
-		commonUtilLs.clear();
+	private String dbQueryRouter(String queryType,String searchVal){
 		
-		String all_domain_options = commonHelperObj.getAllDomainOptions();
-		try{
-			commonTasksRs = commonDaoObj.getAllDomainOptions(all_domain_options);
-			System.out.println("Is rs null : "+commonTasksRs == null);
-			while(commonTasksRs.next()){
-				commonUtilLs.add(commonTasksRs.getString("DomainName"));	
-			}
-		}catch(Exception ex){
-			System.out.println("CommonTasksController :: getMemberSpecificOpenTicket -- "+ex.getMessage());
-		}finally{
-			System.out.println("Comtroller Rs size"+commonUtilLs.size());
-			return commonUtilLs;
+		String dbQuery = "";
+		switch(queryType){
+		
+			case "AllMembers" :
+				dbQuery = commonHelperObj.getAllMembersQuery();
+				break;
+			
+			case "AllDomains" :
+				dbQuery = commonHelperObj.getAllDomainOptions();
+				break;
+			
+			case "AllRootCause" :
+				dbQuery = commonHelperObj.getAllRootCauseQuery();
+				break;
+			
+			case "AllCountries" :
+				dbQuery = commonHelperObj.getAllCountriesQuery();
+				break;
+			
+			case "IncidentsOpenWithTeam" :
+				dbQuery = managerDaoHelper.getOpenTicketsInTeamQuery();
+				break;
+				
+			case "LoggedUserIncidentsInQueue" :
+				dbQuery = staffDaoHelperObj.getIncidentsInLoggedUserQuery();
+				break;
+			
+			case "MemberSpecificOpenTicket" :
+				dbQuery = managerDaoHelper.getSelectedMemberOpenTickets(searchVal);
+				break;
+			
+			case "DomainToSubDomainMap" :
+				dbQuery = commonHelperObj.getDomainToSubDomainMappingQuery(searchVal);
+				break;
+			
+			case "SearchIncById" :
+				dbQuery = commonHelperObj.getSearchByIncIdQuery(searchVal);
+				break;
+		
+			case "searchTicketByKeyword" :
+				dbQuery = commonHelperObj.getSearchByKeywordQuery(searchVal);
+				break;		
+			
 		}
+		return dbQuery;
 	}
-
-	public List<String> getDomainToSubDomainMap(String selectedDomain) {
+	
+	private IncidentsBean setIncidentBean(ResultSet commonTasksRs,IncidentsBean incidentBean,String searchCriteria) throws SQLException {
+		
+		incidentBean.setIncidentID(commonTasksRs.getString("IncidentID"));
+		incidentBean.setTitle(commonTasksRs.getString("Title"));
+		incidentBean.setSla_target_date(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(commonTasksRs.getTimestamp("SLATargetDate")));
+		incidentBean.setAssignee(commonTasksRs.getString("Assignee"));
+		incidentBean.setSeverity(commonTasksRs.getInt("Severity"));
+		incidentBean.setCreatedDate(commonTasksRs.getString("DateCreated"));
+		incidentBean.setClosedDate(commonTasksRs.getString("DateClosed"));
+		incidentBean.setWsrCurrentStatus(commonTasksRs.getString("Status"));
+		incidentBean.setSm9Status(commonTasksRs.getString("SM7Status"));
+		incidentBean.setRaisedBy(commonTasksRs.getString("ContactWhoRaised"));
+		incidentBean.setAssetName(commonTasksRs.getString("Asset"));
+		incidentBean.setCountry(commonTasksRs.getString("Country"));
+		incidentBean.setClosureCode(commonTasksRs.getString("ClosureCode"));
+		incidentBean.setIsUpdated(commonTasksRs.getString("IsUpdated"));
+		if(!(searchCriteria.equals("MemberSpecificOpenTicket")|| searchCriteria.equals("IncidentsOpenWithTeam") 
+				|| searchCriteria.equals("LoggedUserIncidentsInQueue"))){	
+			incidentBean.setdomainName(commonTasksRs.getString("Domain_Name"));
+			incidentBean.setsubDomainName(commonTasksRs.getString("SubDomain"));
+			incidentBean.setrootCauseName(commonTasksRs.getString("RootCause"));
+			incidentBean.setupdateCountryName(commonTasksRs.getString("CountryName"));			
+		}
+		
+		return incidentBean;
+		
+	}
+	
+	//Move this changes to join query and handle it in fetchFromDb()..
+/*	public List<String> getDomainToSubDomainMap(String selectedDomain) {
 		
 		commonTasksRs = null;
 		commonUtilLs.clear();
 		String domainId="";
 		String get_DomainId_Query = commonHelperObj.getDomainIdQuery(selectedDomain);
 		try{
-			commonTasksRs = commonDaoObj.getDomainId(get_DomainId_Query);
+			commonTasksRs = dbAccessorObj.queryToDb(get_DomainId_Query);
 			while(commonTasksRs.next()){
 				domainId = commonTasksRs.getString("DomainId");
 			}
@@ -175,28 +200,52 @@ public class CommonTasksController {
 			commonTasksRs = null;
 			if(!("").equals(get_DomainId_Query)){
 				String get_Sub_Domain_as_Ls_query = commonHelperObj.getSubDomainListQuery(domainId);		
-				commonTasksRs = commonDaoObj.getSubDomainsAsList(get_Sub_Domain_as_Ls_query);
+				commonTasksRs = dbAccessorObj.queryToDb(get_Sub_Domain_as_Ls_query);
 				while(commonTasksRs.next()){
 					commonUtilLs.add(commonTasksRs.getString("SubDomain"));
 				}
-			}
-			
+			}	
 		}catch(Exception ex){
 			System.out.println("CommonTasksController :: getDomainToSubDomainMap -- "+ex.getMessage());
 		}finally{
 			commonTasksRs = null;
 			return commonUtilLs;
 		}
-		
 	}
 	
+		public List<String> getAllDomains() {
+
+	commonTasksRs = null;
+	commonUtilLs.clear();
+	
+	String all_domain_options = commonHelperObj.getAllDomainOptions();
+	try{
+		commonTasksRs = dbAccessorObj.queryToDb(all_domain_options);
+		System.out.println("Is rs null : "+commonTasksRs == null);
+		while(commonTasksRs.next()){
+			commonUtilLs.add(commonTasksRs.getString("DomainName"));	
+		}
+	}catch(Exception ex){
+		System.out.println("CommonTasksController :: getMemberSpecificOpenTicket -- "+ex.getMessage());
+	}finally{
+		System.out.println("Comtroller Rs size"+commonUtilLs.size());
+		return commonUtilLs;
+	}
+	}
+
 	public List<String> getAllRootCause() {
 		
 		commonTasksRs = null;
 		commonUtilLs.clear();
 		String all_rootcause_query = commonHelperObj.getAllRootCauseQuery();
 		try{
-			commonTasksRs = commonDaoObj.getAllRootCause(all_rootcause_query);
+			long startTime4  = System.currentTimeMillis();
+		
+			commonTasksRs = dbAccessorObj.queryToDb(all_rootcause_query);
+		
+			long stopTime4 = System.currentTimeMillis();
+			System.out.println("Time taken for CTRL RootCause Drop down : "+ (float)(stopTime4 - startTime4)/1000 + " seconds");
+			
 			while(commonTasksRs.next()){
 				commonUtilLs.add(commonTasksRs.getString("RootCause"));
 			}
@@ -215,7 +264,7 @@ public class CommonTasksController {
 		commonUtilLs.clear();
 		String all_country_query = commonHelperObj.getAllCountriesQuery();
 		try{
-			commonTasksRs = commonDaoObj.getAllCountries(all_country_query);
+			commonTasksRs = dbAccessorObj.queryToDb(all_country_query);
 			while(commonTasksRs.next()){
 				commonUtilLs.add(commonTasksRs.getString("CountryName"));
 			}
@@ -225,31 +274,26 @@ public class CommonTasksController {
 		}finally{
 			commonTasksRs = null;
 			return commonUtilLs;
-		}	}
-
-	private IncidentsBean setIncidentBean(ResultSet commonTasksRs,IncidentsBean incidentBean,String methodName) throws SQLException {
-		
-		incidentBean.setIncidentID(commonTasksRs.getString("IncidentID"));
-		incidentBean.setTitle(commonTasksRs.getString("Title"));
-		incidentBean.setSla_target_date(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(commonTasksRs.getTimestamp("SLATargetDate")));
-		incidentBean.setAssignee(commonTasksRs.getString("Assignee"));
-		incidentBean.setCreatedDate(commonTasksRs.getString("DateCreated"));
-		incidentBean.setClosedDate(commonTasksRs.getString("DateClosed"));
-		incidentBean.setWsrCurrentStatus(commonTasksRs.getString("Status"));
-		incidentBean.setSm9Status(commonTasksRs.getString("SM7Status"));
-		incidentBean.setRaisedBy(commonTasksRs.getString("ContactWhoRaised"));
-		incidentBean.setAssetName(commonTasksRs.getString("Asset"));
-		incidentBean.setCountry(commonTasksRs.getString("Country"));
-		incidentBean.setClosureCode(commonTasksRs.getString("ClosureCode"));
-		incidentBean.setIsUpdated(commonTasksRs.getString("IsUpdated"));
-		incidentBean.setdomainName(commonTasksRs.getString("Domain_Name"));
-		incidentBean.setsubDomainName(commonTasksRs.getString("SubDomain"));
-		incidentBean.setrootCauseName(commonTasksRs.getString("RootCause"));
-		incidentBean.setupdateCountryName(commonTasksRs.getString("CountryName"));
-		incidentBean.setSeverity(commonTasksRs.getInt("Severity"));
-		
-		return incidentBean;
+		}	
 		
 	}
+		
+	public List<String> getAllMembers() {
+	
+	commonTasksRs = null;
+	commonUtilLs.clear();	
+	String all_members_query = commonHelperObj.getAllMembersQuery();
+	
+	try{
+		commonTasksRs = dbAccessorObj.queryToDb(all_members_query);
+		while(commonTasksRs.next()){
+			commonUtilLs.add(commonTasksRs.getString("UserID"));
+		}
+	}catch(Exception ex){
+		System.out.println("CommonTasksController :: getAllMembers -- "+ex.getMessage());
+	}finally{	
+		return commonUtilLs;
+	}
+}*/
 
 }

@@ -8,27 +8,36 @@ import javax.swing.JOptionPane;
 
 public class ConnectToDB {
 
+	private static Connection conn = null; 
+	
 	@SuppressWarnings("finally")
 	public Connection getConnection(){
 	
-		Connection conn =null;
+		long startTime3  = System.currentTimeMillis();
 		
-		String forName = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-		String auth_details = "jdbc:sqlserver://10.47.37.90;DatabaseName=eHaulier_DR;integratedSecurity=true";	
-	
-		try{
-		
-			Class.forName(forName);	
-			conn = DriverManager.getConnection(auth_details);
-		
-		}catch(SQLException sql_ex){
-			JOptionPane.showMessageDialog(null,"Connection Prob");
-			System.out.println("ConnectToDB -- getConnection() :: "+sql_ex);
-		} catch (ClassNotFoundException cnf_ex) {
-			JOptionPane.showMessageDialog(null,"Connection Prob");
-			System.out.println("ConnectToDB -- getConnection() :: "+cnf_ex);
-		}finally{
+		if(conn == null){
 			
+			String forName = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+			String auth_details = "jdbc:sqlserver://10.47.37.90;DatabaseName=eHaulier_DR;integratedSecurity=true";	
+	
+			try{
+		
+				Class.forName(forName);	
+				conn = DriverManager.getConnection(auth_details);
+		
+			}catch(SQLException sql_ex){
+				JOptionPane.showMessageDialog(null,"Connection Prob");
+				System.out.println("ConnectToDB -- getConnection() :: "+sql_ex);
+			} catch (ClassNotFoundException cnf_ex) {
+				JOptionPane.showMessageDialog(null,"Connection Prob");
+				System.out.println("ConnectToDB -- getConnection() :: "+cnf_ex);
+			}finally{	
+				long stopTime3 = System.currentTimeMillis();
+				System.out.println("Time taken for CONN Status Drop down : "+ (float)(stopTime3 - startTime3)/1000 + " seconds");
+				return conn;
+			}
+		}else{
+			System.out.println("-- Taken from Static--");
 			return conn;
 		}
 	}

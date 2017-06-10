@@ -13,80 +13,26 @@ import java.util.List;
 import java.util.Map;
 
 import com.opencsv.CSVReader;
-import com.wsr.dao.CommonActivitiesDao;
+import com.wsr.dao.WsrDbAccessor;
 import com.wsr.dao.CommonActivitiesDaoHelper;
-import com.wsr.dao.ManagerActivitiesDao;
 import com.wsr.dao.ManagerActivitiesDaoHelper;
 import com.wsr.model.IncidentsBean;
 
 @SuppressWarnings("finally")
 public class ManagerTasksController {
 	
+	boolean flag;
 	ResultSet managerTasksRs;
 	
-	IncidentsBean tempBean = new IncidentsBean();
-	List<String> mgrStringLs = new ArrayList<String>();
-	List<IncidentsBean> mgrIncBeanLs = new ArrayList<IncidentsBean>();
-	List<IncidentsBean> incBeanLs = new ArrayList<IncidentsBean>();
 	Map<String, String> tableValueMap;
 	Map<Integer, String> tableHeadingValueMap;
+	IncidentsBean tempBean = new IncidentsBean();
+	List<String> mgrStringLs = new ArrayList<String>();
+	List<IncidentsBean> incBeanLs,mgrIncBeanLs = new ArrayList<IncidentsBean>();
 	
-	ManagerActivitiesDaoHelper managerDaoHelper = new ManagerActivitiesDaoHelper();
+	WsrDbAccessor dbAccessorObj = new WsrDbAccessor();
 	CommonActivitiesDaoHelper commonHelperObj = new CommonActivitiesDaoHelper();
-	CommonActivitiesDao commonDaoObj = new CommonActivitiesDao();
-	ManagerActivitiesDao mgrDoaObj = new ManagerActivitiesDao();
-	
-	boolean flag;
-	
-	public List<IncidentsBean> getIncidentsOpenWithTeam(){
-		
-		tempBean = null;
-		managerTasksRs = null;
-		mgrIncBeanLs.clear();
-		String open_tickets_in_team_query = managerDaoHelper.getOpenTicketsInTeamQuery();
-
-		try{
-			managerTasksRs = mgrDoaObj.getIncidentsOpenWithTeam(open_tickets_in_team_query);
-			if(managerTasksRs != null){
-				while(managerTasksRs.next()){
-					tempBean = new IncidentsBean();
-					tempBean = settempBean(managerTasksRs,tempBean,"getIncidentsOpenWithTeam");
-					mgrIncBeanLs.add(tempBean);
-				}
-			}else{
-				System.out.println("ManagerTasksController :: getIncidentsOpenWithTeam -- IncOpenWithTeam is null in DB");
-			}
-		}catch(Exception ex){
-			System.out.println("ManagerTasksController :: getIncidentsOpenWithTeam -- "+ex.getMessage());
-		}finally{
-			return mgrIncBeanLs;
-		}
-	}
-
-	public List<IncidentsBean> getMemberSpecificOpenTicket(String selectedMember) {
-		
-		tempBean = null;
-		managerTasksRs = null;
-		mgrIncBeanLs.clear();
-		String selected_member_open_tickets = managerDaoHelper.getSelectedMemberOpenTickets(selectedMember);
-		try{
-			managerTasksRs = mgrDoaObj.getSelectedMemberOpenTickets(selected_member_open_tickets);
-			if(managerTasksRs != null){
-				while(managerTasksRs.next()){
-					tempBean = new IncidentsBean();
-					tempBean = settempBean(managerTasksRs,tempBean,"getMemberSpecificOpenTicket");
-					mgrIncBeanLs.add(tempBean);
-				}
-			}else{
-				System.out.println("ManagerActivites -- getMemberSpecificOpenTicket : selectedMember has no open tkt in DB !!");
-				//	return null;
-			}
-		}catch(Exception ex){
-			System.out.println("ManagerTasksController :: getMemberSpecificOpenTicket -- "+ex.getMessage());
-		}finally{
-			return mgrIncBeanLs;
-		}
-	}
+	ManagerActivitiesDaoHelper managerDaoHelper = new ManagerActivitiesDaoHelper();	
 	
 	public List<IncidentsBean> refinedSearchQueryBuilder(Map<String,List<String>> searchFilterCriteriaMap) {
 		
@@ -108,11 +54,11 @@ public class ManagerTasksController {
 			filterFieldsUtilLs.add(memberUtil);
 			
 			String filterSearchQuery = managerDaoHelper.generateFilterQuery(searchFilterCriteriaMap,filterFieldsUtilLs);
-			managerTasksRs = mgrDoaObj.getFilteredSearchTickets(filterSearchQuery);
+			managerTasksRs = dbAccessorObj.queryToDb(filterSearchQuery);
 			if(managerTasksRs != null){
 				while(managerTasksRs.next() == true){
 					tempBean = new IncidentsBean();
-					tempBean = settempBean(managerTasksRs,tempBean,"refinedSearchQueryBuilder");
+					tempBean = setTempBean(managerTasksRs,tempBean,"refinedSearchQueryBuilder");
 					mgrIncBeanLs.add(tempBean);
 				}
 			}
@@ -123,9 +69,83 @@ public class ManagerTasksController {
 			filterFieldsUtilLs.clear();
 			return mgrIncBeanLs;
 		}
+	}	
+
+	public boolean IterateThroughOpenSheet(CSVReader reader) throws ParseException, SQLException {
+		
+		tempBean = null; 
+		String row[],rowHeading[];
+		int size =0,count = 0,rowAffected = 0;
+		String query = null,basicCommentUpdateQuery = null;
+		try {
+			// Getting Column Header
+			rowHeading = reader.readNext();
+			size = rowHeading.length;
+			tableHeadingValueMap = new HashMap<>();
+			for(int i = 0; i < size; i++){
+				tableHeadingValueMap.put( i , rowHeading[i]);
+			}
+			// Iterating through column
+			while((row = reader.readNext()) != null){
+				count++;
+			//  change this line..	incBeanLs.clear();
+				incBeanLs = new ArrayList<IncidentsBean>();
+				for(int i=0;i<row.length;i++){
+					String checkIncident = row[i].toString();
+					if(checkIncident.startsWith("GIM")){
+						
+						String search_by_Inc_ID_Query = commonHelperObj.getSearchByIncIdQuery(checkIncident);
+						managerTasksRs = dbAccessorObj.queryToDb(search_by_Inc_ID_Query);			
+						flag = (managerTasksRs.next()) ? true : false ;
+						//flag = searchIncById(checkIncident);
+					}
+				}
+				
+				//tableValueList = new ArrayList<String>();
+				tableValueMap  = new HashMap<>();
+				
+				for(int i=0;i<row.length;i++){
+					if(row[i].contains("\'")){
+						row[i] = row[i].replace("'", "\''");
+					}
+				tableValueMap.put(tableHeadingValueMap.get(i), row[i]);
+				}
+				
+				tempBean =  new IncidentsBean();
+                tempBean = setIncidentBean(tableValueMap,tempBean,"IterateThroughSheet");
+                incBeanLs .add(tempBean);
+                // Query Building Block
+                int listCount = 0;
+                if(flag == false){
+                	query = managerDaoHelper.getInsertOpenIncidentListQuery(incBeanLs, listCount);
+                	rowAffected = dbAccessorObj.performCudIntoDb(query);
+                	System.out.println("inserted into testtemptable");
+                // Adding the basic comment for new open tickets
+                	
+                	basicCommentUpdateQuery = managerDaoHelper.getBasicCommentUpdateQuery(incBeanLs,listCount);
+                	System.out.println("basicqueryupdated" + basicCommentUpdateQuery);
+                	System.out.println("inserted into historicactivities");
+                }
+                else{
+                	query = managerDaoHelper.getUpdateClosedIncidentListQuery(incBeanLs, listCount);
+                	rowAffected = dbAccessorObj.performCudIntoDb(query);
+                }
+                listCount++;
+
+                System.out.println("queryupdated" + query);
+				
+				}
+			System.out.println("count: "+count);
+		}catch (IOException e) {
+			e.printStackTrace();
+		}	
+		if(rowAffected == 1)
+			return true;
+		else
+			return false;
 	}
-	
-	private IncidentsBean settempBean(ResultSet managerTasksRs, IncidentsBean tempBean, String methodType) throws SQLException {
+
+private IncidentsBean setTempBean(ResultSet managerTasksRs, IncidentsBean tempBean, String methodType) throws SQLException {
 		
 		tempBean.setIncidentID(managerTasksRs.getString("IncidentID"));
 		tempBean.setTitle(managerTasksRs.getString("Title"));
@@ -141,9 +161,8 @@ public class ManagerTasksController {
 		tempBean.setCountry(managerTasksRs.getString("Country"));
 		tempBean.setClosureCode(managerTasksRs.getString("ClosureCode"));
 		tempBean.setIsUpdated(managerTasksRs.getString("IsUpdated"));
-		if(!(methodType.equals("getMemberSpecificOpenTicket")|| methodType.equals("getIncidentsOpenWithTeam") 
-				|| methodType.equals("refinedSearchQueryBuilder"))){
-		
+		if(!(methodType.equals("refinedSearchQueryBuilder")|| methodType.equals("getIncidentsOpenWithTeam") 
+				|| methodType.equals("getMemberSpecificOpenTicket"))){	
 			tempBean.setdomainName(managerTasksRs.getString("Domain_Name"));
 			tempBean.setsubDomainName(managerTasksRs.getString("SubDomain"));
 			tempBean.setrootCauseName(managerTasksRs.getString("RootCause"));
@@ -153,87 +172,7 @@ public class ManagerTasksController {
 		return tempBean;
 	}
 
-	public boolean IterateThroughOpenSheet(CSVReader reader) throws ParseException {
-
-		int count = 0;
-		String row[];
-		String rowHeading[];
-		tempBean = null;
-		boolean updateFlag = false;
-		String query = null;
-		boolean commentUpdateFlag = false;
-		String basicCommentUpdateQuery = null;
-		try {
-			
-			// Getting Column Header
-			rowHeading = reader.readNext();
-			int size = rowHeading.length;
-			tableHeadingValueMap = new HashMap<>();
-			for(int i = 0; i < size; i++){
-			tableHeadingValueMap.put( i , rowHeading[i]);
-			}
-			
-			// Iterating through column
-			while((row = reader.readNext()) != null){
-				count++;
-				incBeanLs.clear();
-				for(int i=0;i<row.length;i++){
-				String checkIncident = row[i].toString();
-				if(checkIncident.startsWith("GIM")){
-					flag = searchIncById(checkIncident);
-				}
-				}
-				
-				//tableValueList = new ArrayList<String>();
-				tableValueMap  = new HashMap<>();
-				
-				for(int i=0;i<row.length;i++){
-					if(row[i].contains("\'")){
-						row[i] = row[i].replace("'", "\''");
-					}
-				tableValueMap.put(tableHeadingValueMap.get(i), row[i]);
-				}
-				
-				/*for(int i=0;i<row.length;i++){
-					tableValueList.add(row[i]);
-					
-				}*/
-				tempBean =  new IncidentsBean();
-                tempBean = setIncidentBean(tableValueMap,tempBean,"IterateThroughSheet");
-                incBeanLs .add(tempBean);
-                // Query Building Block
-                int listCount = 0;
-                if(flag == false){
-                	query = managerDaoHelper.getInsertOpenIncidentListQuery(incBeanLs, listCount);
-                	updateFlag = mgrDoaObj.getOpenIncidentListUpadtes(query);
-                	System.out.println("inserted into testtemptable");
-                // Adding the basic comment for new open tickets
-                	
-                	basicCommentUpdateQuery = managerDaoHelper.getBasicCommentUpdateQuery(incBeanLs,listCount);
-                	System.out.println("basicqueryupdated" + basicCommentUpdateQuery);
-                	commentUpdateFlag = mgrDoaObj.getOpenIncidentListUpadtes(basicCommentUpdateQuery);
-                	System.out.println("inserted into historicactivities");
-                }
-                else{
-                	query = managerDaoHelper.getUpdateClosedIncidentListQuery(incBeanLs, listCount);
-                	 updateFlag = mgrDoaObj.getCloseIncidentListUpadtes(query);
-                }
-                listCount++;
-
-                System.out.println("queryupdated" + query);
-				
-				}
-			System.out.println("count: "+count);
-		}catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return updateFlag;
-	}
-
 	private IncidentsBean setIncidentBean(Map<String, String> tableValueMap, IncidentsBean tempBean, String IterateThroughSheet) throws ParseException {
-		// TODO Auto-generated method stub
 		
 		DateFormat outputFormat = new SimpleDateFormat("YYYY-MM-dd HH:mm:sss");
 		DateFormat inputFormat = new SimpleDateFormat("dd/MM/yy HH:mm");
@@ -279,23 +218,70 @@ public class ManagerTasksController {
 		return tempBean;
 	}
 	
-	public boolean searchIncById(String searchId) {
+	/*	public boolean searchIncById(String searchId) {
 		
 		flag = false;
 		managerTasksRs = null;
 		
 		String search_by_Inc_ID_Query = commonHelperObj.getSearchByIncIdQuery(searchId);
-		
 		try{
-			
-			managerTasksRs = commonDaoObj.searchByIncidentID(search_by_Inc_ID_Query);			
+			managerTasksRs = dbAccessorObj.queryToDb(search_by_Inc_ID_Query);			
 			flag = (managerTasksRs.next()) ? true : false ;
-			
 		}catch(Exception ex){
 			System.out.println("CommonTasksController :: searchIncById -- "+ex.getMessage());
 		}finally{	
 			return flag;
 		}
 	}
+	
+	public List<IncidentsBean> getIncidentsOpenWithTeam(){
+	
+	tempBean = null;
+	managerTasksRs = null;
+	mgrIncBeanLs.clear();
+	String open_tickets_in_team_query = managerDaoHelper.getOpenTicketsInTeamQuery();
+
+	try{
+		managerTasksRs = dbAccessorObj.queryToDb(open_tickets_in_team_query);
+		if(managerTasksRs != null){
+			while(managerTasksRs.next()){
+				tempBean = new IncidentsBean();
+				tempBean = setTempBean(managerTasksRs,tempBean,"getIncidentsOpenWithTeam");
+				mgrIncBeanLs.add(tempBean);
+			}
+		}else{
+			System.out.println("ManagerTasksController :: getIncidentsOpenWithTeam -- IncOpenWithTeam is null in DB");
+		}
+	}catch(Exception ex){
+		System.out.println("ManagerTasksController :: getIncidentsOpenWithTeam -- "+ex.getMessage());
+	}finally{
+		return mgrIncBeanLs;
+	}
+}
+
+public List<IncidentsBean> getMemberSpecificOpenTicket(String selectedMember) {
+	
+	tempBean = null;
+	managerTasksRs = null;
+	mgrIncBeanLs.clear();
+	String selected_member_open_tickets = managerDaoHelper.getSelectedMemberOpenTickets(selectedMember);
+	try{
+		managerTasksRs = dbAccessorObj.queryToDb(selected_member_open_tickets);
+		if(managerTasksRs != null){
+			while(managerTasksRs.next()){
+				tempBean = new IncidentsBean();
+				tempBean = setTempBean(managerTasksRs,tempBean,"getMemberSpecificOpenTicket");
+				mgrIncBeanLs.add(tempBean);
+			}
+		}else{
+			System.out.println("ManagerActivites -- getMemberSpecificOpenTicket : selectedMember has no open tkt in DB !!");
+			//	return null;
+		}
+	}catch(Exception ex){
+		System.out.println("ManagerTasksController :: getMemberSpecificOpenTicket -- "+ex.getMessage());
+	}finally{
+		return mgrIncBeanLs;
+	}
+}*/
 	
 }

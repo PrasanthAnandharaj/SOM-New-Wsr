@@ -3,7 +3,6 @@ package com.wsr.ui;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Cursor;
 
 import javax.swing.border.BevelBorder;
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.Toolkit;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
@@ -23,16 +21,10 @@ import javax.swing.border.SoftBevelBorder;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
-
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.omg.CORBA.PUBLIC_MEMBER;
 
 import com.wsr.controller.CommonTasksController;
 import com.wsr.controller.ManagerTasksController;
@@ -47,12 +39,9 @@ import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.border.EtchedBorder;
 import javax.swing.JTable;
-import javax.swing.border.LineBorder;
-import javax.swing.ListSelectionModel;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.awt.event.ActionEvent;
@@ -145,7 +134,6 @@ public class ManagerLandingPage extends JTable{
 		    	System.out.println(info.getName());
 		        if ("Nimbus".equals(info.getName())) {
 		            UIManager.setLookAndFeel(info.getClassName());
-		           
 		            break;
 		        }
 		        
@@ -354,11 +342,11 @@ public class ManagerLandingPage extends JTable{
 				try{
 					if(!selection.contains("Please Select")){
 					
-							mgrIncBeanLs = managerControllerObj.getMemberSpecificOpenTicket(selection);
+							mgrIncBeanLs = commonControllerObj.searchIncidents("MemberSpecificOpenTicket",selection);
 							displayTable(mgrIncBeanLs);							
 						
 					}else{
-						mgrIncBeanLs = managerControllerObj.getMemberSpecificOpenTicket(loggedUserBean.getUserId());
+						mgrIncBeanLs = commonControllerObj.searchIncidents("MemberSpecificOpenTicket",loggedUserBean.getUserId());
 						displayTable(mgrIncBeanLs);	
 					}
 				}catch(Exception ex){
@@ -377,7 +365,7 @@ public class ManagerLandingPage extends JTable{
 		//clearing the LS for having only current elements..
 		mgrPageUtilLs.clear();
 		cmbSrcByMember.addItem("-- Please Select --");
-		mgrPageUtilLs = commonControllerObj.getAllMembers();
+		mgrPageUtilLs = commonControllerObj.fetchFromDB("AllMembers",null);
 		for(int cmbMbrIter=0;cmbMbrIter < mgrPageUtilLs.size();cmbMbrIter++){
 			cmbSrcByMember.addItem(mgrPageUtilLs.get(cmbMbrIter));
 		}
@@ -450,7 +438,7 @@ public class ManagerLandingPage extends JTable{
 				System.out.println("Search ID :"+searchId);	
 				try{
 					
-					mgrIncBeanLs = commonControllerObj.searchIncById(searchId);
+					mgrIncBeanLs = commonControllerObj.searchIncidents("SearchIncById",searchId);
 					//Successfully ticket is fetched case..
 					if(mgrIncBeanLs.size() == 1){	
 						displayTable(mgrIncBeanLs);
@@ -478,7 +466,7 @@ public class ManagerLandingPage extends JTable{
 				String SearchKeyword = txtSrchByText.getText().trim();
 				System.out.println("Search text : "+SearchKeyword);
 				try{
-					mgrIncBeanLs = commonControllerObj.searchTicketByKeyword(SearchKeyword);
+					mgrIncBeanLs = commonControllerObj.searchIncidents("searchTicketByKeyword",SearchKeyword);
 					if(mgrIncBeanLs.size() != 0){
 						displayTable(mgrIncBeanLs);
 					}else{
@@ -579,7 +567,8 @@ public class ManagerLandingPage extends JTable{
 		mgrIncBeanLs.clear();
 		try{
 			frmManagerScreen.setCursor(waitCursor);
-			mgrIncBeanLs = (userLoggedInAs.equals("Admin"))  ?managerControllerObj.getIncidentsOpenWithTeam() : staffControllerObj.getLoggedUserIncidentsInQueue();
+			mgrIncBeanLs = (userLoggedInAs.equals("Admin"))  ? commonControllerObj.searchIncidents("IncidentsOpenWithTeam",null) 
+										: commonControllerObj.searchIncidents("LoggedUserIncidentsInQueue",null);
 			displayTable(mgrIncBeanLs);
 			
 		}catch(Exception ex){
@@ -637,20 +626,20 @@ public class ManagerLandingPage extends JTable{
 	    
 	    //Setting Column names..
 	    dtm.addColumn("Incident ID");
-	    columnModel.getColumn(0).setMinWidth(500);
+	    columnModel.getColumn(0).setPreferredWidth(500);
 	    
 		dtm.addColumn("Title");
-		columnModel.getColumn(1).setMinWidth(1000);
+		columnModel.getColumn(1).setPreferredWidth(1000);
 
 
 		dtm.addColumn("Severity");
-		columnModel.getColumn(2).setMinWidth(20);
+		columnModel.getColumn(2).setPreferredWidth(20);
 		
 		dtm.addColumn("Asssignee");
-		columnModel.getColumn(3).setMinWidth(60);
+		columnModel.getColumn(3).setPreferredWidth(60);
 		
 		dtm.addColumn("SLA Breach");
-		columnModel.getColumn(4).setMinWidth(80);
+		columnModel.getColumn(4).setPreferredWidth(80);
 		
 		try{
 			if(mgrIncBeanLs.size() == 0){
@@ -682,6 +671,7 @@ public class ManagerLandingPage extends JTable{
 	}
 
 
+	@SuppressWarnings("unused")
 	private void checkAlertStatus(String sla_target_date) throws ParseException {
 		
 	        Date today = new Date();

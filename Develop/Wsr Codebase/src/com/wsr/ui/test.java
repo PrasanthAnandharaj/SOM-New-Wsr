@@ -1,90 +1,59 @@
 package com.wsr.ui;
 
-import java.awt.EventQueue;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
 
-import javax.swing.JFrame;
-import javax.swing.JTabbedPane;
-import java.awt.BorderLayout;
-import java.awt.Color;
+/**
+ * A simple Java wait cursor example.
+ * @author Alvin Alexander, devdaily.com
+ */
+public class test implements ActionListener
+{
+  private JFrame frame;
+  private String defaultButtonText = "Show Wait Cursor";
+  private JButton button = new JButton(defaultButtonText);
+  private Cursor waitCursor = new Cursor(Cursor.WAIT_CURSOR);
+  private Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+  private boolean waitCursorIsShowing;
+  
+  public static void main(String[] args)
+  {
+    new test();
+  }
 
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JLabel;
+  public test()
+  {
+    // our class is the actionlistener on the button
+    button.addActionListener(this);
 
-public class test {
+    // note: this should be inside a SwingUtilities.invokeLater call.
+    // see: http://devdaily.com/java/jframe-example
+    frame = new JFrame("Java Wait Cursor Example");
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.getContentPane().add(button);
+    frame.setPreferredSize(new Dimension(400,300));
+    frame.pack();
+    frame.setLocationRelativeTo(null);
+    frame.setVisible(true);
+  }
 
-	private JFrame frame;
-	private JTable table;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					test window = new test();
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	/**
-	 * Create the application.
-	 */
-	public test() {
-		initialize();
-	}
-
-	/**
-	 * Initialize the contents of the frame.
-	 */
-	private void initialize() {
-		frame = new JFrame();
-		frame.setBounds(100, 100, 725, 493);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(null);
-		
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.setBounds(0, 0, 707, 448);
-		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-		
-		frame.getContentPane().add(tabbedPane);
-		
-		JPanel panel = new JPanel();
-		tabbedPane.addTab("New tab", null, panel, null);
-		panel.setLayout(null);
-		
-		JLabel test = new JLabel("Test");
-		panel.add(test);
-		System.out.println("Hello");
-		
-		tabbedPane.setLayout(null);
-		
-	/*	table = new JTable();
-		table.setBounds(38, 47, 621, 312);
-		
-		DefaultTableModel drm = new DefaultTableModel();
-		
-		table.setModel(drm);
-		
-		JTableHeader updateHeader = table.getTableHeader();
-		updateHeader.setBackground(Color.BLUE);
-		updateHeader.setForeground(Color.WHITE);
-	    
-		drm.addColumn("Update #");
-		drm.addColumn("Update Date");
-		drm.addColumn("Update");
-		
-		panel.add(updateHeader);
-		panel.add(table);*/
-		
-		frame.setVisible(true);
-	}
+  public void actionPerformed(ActionEvent evt)
+  {
+    if (waitCursorIsShowing)
+    {
+      // set the cursor back to the default
+      waitCursorIsShowing = false;
+      button.setText(defaultButtonText);
+      frame.setCursor(defaultCursor);
+    }
+    else
+    {
+      // change the cursor to the wait cursor
+      waitCursorIsShowing = true;
+      button.setText("Back to Default Cursor");
+      frame.setCursor(waitCursor);
+    }
+  }
+  
 }
