@@ -4,12 +4,14 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 
 import javax.swing.border.BevelBorder;
 import java.awt.Window.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Vector;
 import java.awt.Font;
 import java.awt.Toolkit;
 import javax.swing.JMenuBar;
@@ -578,7 +580,6 @@ public class ManagerLandingPage extends JTable{
 		}
 			
 		userPrivilegeFilter();
-	
 		frmManagerScreen.setVisible(true);
 	}
 
@@ -596,51 +597,29 @@ public class ManagerLandingPage extends JTable{
 	@SuppressWarnings({ })
 	private void displayTable(List<IncidentsBean> mgrIncBeanLs) {
 		
-		//~~~~~~~
 		tblTkts = new JTable();
 		tblStyleObj = new WsrCustomTableStyle();
-		tblStyleObj.setWsrTableStandard(tblTkts,"TicketsTable");
+		scrpnlTable.setViewportView(tblTkts);
 		
 		tblTkts.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent em) {
-					
+			public void mousePressed(MouseEvent em) {			
 				listenForProvideUpdateEvent(em);
 			}
 		});
 		
-		scrpnlTable.setViewportView(tblTkts);
-		
-		//~~~~~~~
-		
-		//Emptying the rows and columns to purge previous table Settings.. 
+		//Emptying the rows and columns to purge previous table Settings & Setting Column names..
 		dtm.setRowCount(0);
 		dtm.setColumnCount(0);
-	    
+		String[] tblHeaders = {"Incident ID","Title","Severity","Asssignee","SLA Breach","Interaction Id","Closed Date","Domain","Sub Domain","Root Cause","Issue In"};
+	    for(String clm : tblHeaders){
+	    	dtm.addColumn(clm.toString());
+	    }
 		tblTkts.setModel(dtm);
-		tblTkts.setDefaultRenderer(Object.class, new WsrCustomCellStandard());
-		
 		header = tblTkts.getTableHeader();
 		header.setDefaultRenderer(new WsrCustomHeaderRenderer(tblTkts,header));
-		
 		columnModel = tblTkts.getColumnModel();
-	    
-	    //Setting Column names..
-	    dtm.addColumn("Incident ID");
-	    columnModel.getColumn(0).setPreferredWidth(500);
-	    
-		dtm.addColumn("Title");
-		columnModel.getColumn(1).setPreferredWidth(1000);
+//		tblTkts.setPreferredScrollableViewportSize(new Dimension(500, 800));
 
-
-		dtm.addColumn("Severity");
-		columnModel.getColumn(2).setPreferredWidth(20);
-		
-		dtm.addColumn("Asssignee");
-		columnModel.getColumn(3).setPreferredWidth(60);
-		
-		dtm.addColumn("SLA Breach");
-		columnModel.getColumn(4).setPreferredWidth(80);
-		
 		try{
 			if(mgrIncBeanLs.size() == 0){
 				{
@@ -650,23 +629,24 @@ public class ManagerLandingPage extends JTable{
 			}else{						
 				for(int i=0;i<mgrIncBeanLs.size();i++){
 					dtm.addRow(new Object[]{mgrIncBeanLs.get(i).getIncidentID(),mgrIncBeanLs.get(i).getTitle(),mgrIncBeanLs.get(i).getSeverity(),
-							mgrIncBeanLs.get(i).getAssignee(),mgrIncBeanLs.get(i).getSla_target_date()});
-					
+							mgrIncBeanLs.get(i).getAssignee(),mgrIncBeanLs.get(i).getSla_target_date(),mgrIncBeanLs.get(i).getInteractionID(),
+							mgrIncBeanLs.get(i).getClosedDate(),mgrIncBeanLs.get(i).getdomainName(),mgrIncBeanLs.get(i).getsubDomainName(),
+							mgrIncBeanLs.get(i).getrootCauseName(),mgrIncBeanLs.get(i).getupdateCountryName()});
+		
 				//checkAlertStatus(mgrIncBeanLs.get(i).getSla_target_date());
 				}						
 			}
-			//Setting the row Height..
-			tblTkts.setRowHeight(70);
-			
+			TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<DefaultTableModel>(dtm);
+			tblTkts.setRowSorter(sorter);
 			
 		}catch(Exception exp){
 			System.out.println("ManagerLandingPage -- setTable :"+exp.getMessage());
 		}finally{
-			TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<DefaultTableModel>(dtm);
-			tblTkts.setRowSorter(sorter);
-			
+			// Setting table standards..
+			tblStyleObj.setWsrTableStandard(tblTkts,"TicketsTable");
+			tblTkts.setDefaultRenderer(Object.class, new WsrCustomCellStandard());
 			lblTblrowCount.setText(tblTkts.getRowCount()+ " record(s) listed");
-			mgrIncBeanLs.clear();
+			mgrIncBeanLs.clear();	
 		}
 	}
 

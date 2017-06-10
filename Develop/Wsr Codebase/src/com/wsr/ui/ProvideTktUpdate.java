@@ -39,7 +39,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JTextArea;
@@ -54,11 +53,10 @@ public class ProvideTktUpdate {
 	
 	private JFrame frame;
 	private JPanel pnlInsideTab;
-	private JTextField txtTicketId;
 	private JTabbedPane tbpTktView;
-	private JTextArea textAreaUpdate;
 	private JScrollPane scrpnlInsideTab;
 	private JTable tblSuggestedInc,updatesTbl;
+	private JTextArea textAreaUpdate,txtAreaTitle;
 	private JTableHeader updatesTblHeader,suggestTblheader;
 	private JComboBox cmbDomain,cmbClosureCode, cmbSubDomain,cmbRootCause,cmbCountry,cmbStatus;
 	
@@ -157,6 +155,7 @@ public class ProvideTktUpdate {
 				if(e.getClickCount() == 2){
 					
 					incidentToBeOpenedUpdates = tblSuggestedInc.getValueAt(tblSuggestedInc.getSelectedRow(),0).toString().trim();
+					String updateTabTitle = tblSuggestedInc.getValueAt(tblSuggestedInc.getSelectedRow(),1).toString().trim();
 					
 					if(incidentToBeOpenedUpdates.contains("No Row Present")){
 						
@@ -173,9 +172,10 @@ public class ProvideTktUpdate {
 						tbpTktView.remove(0);
 						//Clearing the Update TextArea for old ticket..
 						textAreaUpdate.setText("");
-						ShowTktUpdatesInTab(incidentToBeOpenedUpdates);
+						ShowTktUpdatesInTab(incidentToBeOpenedUpdates,updateTabTitle);
 						diplaySuggestedInicidentsTable(incidentIdToBeClosed,incidentTitleToBeClosed,userLoggedInAs);
-						loadUpdatePanelWithTktDetails(incidentToBeOpenedUpdates);
+						loadUpdatePanelWithTktDetails(incidentToBeOpenedUpdates,updateTabTitle);
+						tblStyleObj.setWsrTableStandard(tblSuggestedInc, "SuggestionTable");
 					}
 				}
 			}
@@ -208,20 +208,26 @@ public class ProvideTktUpdate {
 		pnlMain.add(pnlInputsForUpdates, BorderLayout.CENTER);
 		pnlInputsForUpdates.setLayout(null);
 		
-		JLabel lblTktId = new JLabel("Ticket ID");
-		lblTktId.setForeground(new Color(255, 127, 80));
-		lblTktId.setBackground(new Color(255, 218, 185));
-		lblTktId.setFont(new Font("Futura Medium", Font.BOLD, 14));
-		lblTktId.setHorizontalAlignment(SwingConstants.CENTER);
-		lblTktId.setBounds(45, 43, 76, 16);
-		pnlInputsForUpdates.add(lblTktId);
+		JLabel lblTktTitle = new JLabel("Ticket Title");
+		lblTktTitle.setForeground(new Color(255, 127, 80));
+		lblTktTitle.setBackground(new Color(255, 218, 185));
+		lblTktTitle.setFont(new Font("Futura Medium", Font.BOLD, 14));
+		lblTktTitle.setHorizontalAlignment(SwingConstants.CENTER);
+		lblTktTitle.setBounds(45, 43, 76, 16);
+		pnlInputsForUpdates.add(lblTktTitle);
 		
-		txtTicketId = new JTextField();
-		txtTicketId.setBackground(new Color(250, 235, 215));
-		txtTicketId.setBounds(165, 40, 300, 22);
-		pnlInputsForUpdates.add(txtTicketId);
-		txtTicketId.setEnabled(false);
-		txtTicketId.setColumns(10);
+		JScrollPane scrpnlTitle = new JScrollPane();
+		scrpnlTitle.setBounds(165, 25, 300, 65);
+		pnlInputsForUpdates.add(scrpnlTitle);
+		
+		txtAreaTitle = new JTextArea();
+		txtAreaTitle.setLineWrap(true);	
+		txtAreaTitle.setEditable(false);
+		txtAreaTitle.setWrapStyleWord(true);
+		txtAreaTitle.setBackground(new Color(250, 235, 215));
+		txtAreaTitle.setBackground(new Color(250, 235, 215));
+		txtAreaTitle.setFont(new Font("Verdana", Font.PLAIN, 14));
+		scrpnlTitle.setViewportView(txtAreaTitle);
 		
 		JLabel lblDomain = new JLabel("Domain");
 		lblDomain.setHorizontalAlignment(SwingConstants.CENTER);
@@ -429,7 +435,7 @@ public class ProvideTktUpdate {
 					if(commentsUpdateSuccess == true){
 						String tabToRefresh=tbpTktView.getTitleAt(0).toString();
 						tbpTktView.remove(0);
-						ShowTktUpdatesInTab(tabToRefresh);
+						ShowTktUpdatesInTab(tabToRefresh,txtAreaTitle.getText());
 						JOptionPane.showMessageDialog(frame, "Comments Updated successfully !!", "Update Success!", JOptionPane.INFORMATION_MESSAGE);
 						textAreaUpdate.setText("");
 					}else{
@@ -479,7 +485,7 @@ public class ProvideTktUpdate {
 								
 								String tabToRefresh=tbpTktView.getTitleAt(0).toString();
 								tbpTktView.remove(0);
-								ShowTktUpdatesInTab(tabToRefresh);
+								ShowTktUpdatesInTab(tabToRefresh,txtAreaTitle.getText());
 							
 							}else{
 								JOptionPane.showMessageDialog(frame, "Cannot Remove comments !!");
@@ -577,7 +583,7 @@ public class ProvideTktUpdate {
 		
 		
 		startTime  = System.currentTimeMillis();
-		ShowTktUpdatesInTab(calledIncId);
+		ShowTktUpdatesInTab(calledIncId,calledIncTitle);
 		stopTime = System.currentTimeMillis();
 		System.out.println("Time taken for Loading Update tab : "+ (float)(stopTime - startTime)/1000 + " seconds");
 		
@@ -587,7 +593,7 @@ public class ProvideTktUpdate {
 		System.out.println("Time taken for Loading Suggestion table : "+ (float)(stopTime - startTime)/1000 + " seconds");
 		
 		startTime  = System.currentTimeMillis();
-		loadUpdatePanelWithTktDetails(calledIncId);
+		loadUpdatePanelWithTktDetails(calledIncId,calledIncTitle);
 		stopTime = System.currentTimeMillis();
 		System.out.println("Time taken for Loading selection tab : "+ (float)(stopTime - startTime)/1000 + " seconds");
 		
@@ -601,11 +607,9 @@ public class ProvideTktUpdate {
 		List<IncidentsBean> suggestedTblIncList = new ArrayList<>();
 		List<IncidentsBean> incList = null;
 		
-		try{
-			
+		try{	
 			incList = new ArrayList<>();
-			incList = (userLoggedInAs.equals("Admin")) ?  commCntrlObj.searchIncidents("IncidentsOpenWithTeam",null) :  commCntrlObj.searchIncidents("LoggedUserIncidentsInQueue",null);
-			
+			incList = (userLoggedInAs.equals("Admin")) ?  commCntrlObj.searchIncidents("IncidentsOpenWithTeam",null) :  commCntrlObj.searchIncidents("LoggedUserIncidentsInQueue",null);	
 			if(closedTabId != null){
 			
 				//setting bean incase of searched Ticket and not an IncidentInQueue ticket..
@@ -655,32 +659,24 @@ public class ProvideTktUpdate {
 			if(suggestedTblIncList.size() == 0){
 				{
 					System.out.println("No row ");
-					dtmSuggestedTbl.addRow(new Object[]{"No Row Present.."});
-
-				}
+					dtmSuggestedTbl.addRow(new Object[]{"No Row Present.."});				}
 				}else{						
-					
-					for(int i=0;i<suggestedTblIncList.size();i++){
-					
-						dtmSuggestedTbl.addRow(new Object[]{suggestedTblIncList.get(i).getIncidentID(),suggestedTblIncList.get(i).getTitle()});	
-
+					for(int i=0;i<suggestedTblIncList.size();i++){	
+						dtmSuggestedTbl.addRow(new Object[]{suggestedTblIncList.get(i).getIncidentID(),suggestedTblIncList.get(i).getTitle()});
 					}	
 					//Setting the row Height..
-					tblSuggestedInc.setRowHeight(50);
-					
+					tblSuggestedInc.setRowHeight(50);	
 			}
-			
 		}catch(Exception exp){
 
 			System.out.println("ProvideTktUpdate -- setTable :"+exp.getMessage());
 		}finally{
-			suggestedTblIncList.clear();
-			
-		}
-		
+			tblStyleObj.setWsrTableStandard(tblSuggestedInc, "SuggestionTable");
+			suggestedTblIncList.clear();	
+		}	
 	}
 	
-	private void ShowTktUpdatesInTab(String incidentToBeUpdated) {
+	private void ShowTktUpdatesInTab(String incidentToBeUpdated, String calledIncTitle) {
 		
 		ticketHistoryLs = null;
 		try{
@@ -694,8 +690,8 @@ public class ProvideTktUpdate {
 				tbpTktView.addTab(ticketHistoryLs.get(0).getIncidentId(),showUpdatesInTable(ticketHistoryLs));
 				//adding the ticket name to Editing ticket name..
 				String openingTktId = tbpTktView.getTitleAt(0);
-				txtTicketId.setText(openingTktId);
-				loadUpdatePanelWithTktDetails(openingTktId);
+				txtAreaTitle.setText(openingTktId);
+				loadUpdatePanelWithTktDetails(openingTktId,calledIncTitle);
 				
 				
 			}else{
@@ -718,7 +714,6 @@ public class ProvideTktUpdate {
 		
 		updatesTbl = new JTable();
 		tblStyleObj = new WsrCustomTableStyle();
-		tblStyleObj.setWsrTableStandard(updatesTbl,"ProvideUpdateTable");
 		
 		updatesTbl.setModel(dtmUpdateTbl);
 		updatesTbl.setDefaultRenderer(Object.class, new WsrCustomCellStandard());
@@ -728,9 +723,10 @@ public class ProvideTktUpdate {
 		
 		dtmUpdateTbl.setRowCount(0);
 		dtmUpdateTbl.setColumnCount(0);
-		dtmUpdateTbl.addColumn("Date");
-		dtmUpdateTbl.addColumn("Status");
-		dtmUpdateTbl.addColumn("Updates");
+		String[] updateTblClm ={"Date","Status","Updates"};
+		for(String clmName : updateTblClm){
+			dtmUpdateTbl.addColumn(clmName);
+		}
 		
 		try{
 			for(int iter=0;iter<ticketHistoryLs.size();iter++){
@@ -739,7 +735,7 @@ public class ProvideTktUpdate {
 						ticketHistoryLs.get(iter).getStatus(),ticketHistoryLs.get(iter).getComment()});
 			}
 			
-			updatesTbl.setRowHeight(50);
+			
 			updatesTbl.setForeground(Color.RED);
 			updatesTbl.setBackground(Color.lightGray);
 			
@@ -748,6 +744,7 @@ public class ProvideTktUpdate {
 			System.out.println("ProvideTktUpdate -- showUpdatesInTable :"+exp.getMessage());
 		}
 		
+		tblStyleObj.setWsrTableStandard(updatesTbl, "ProvideUpdate");
 		scrpnlInsideTab.setViewportView(updatesTbl);
 		pnlInsideTab.add(scrpnlInsideTab,BorderLayout.CENTER);
 		
@@ -785,7 +782,7 @@ public class ProvideTktUpdate {
 		return corectDateFormat;
 	}
 
-	private void loadUpdatePanelWithTktDetails(String selectedTktId) {
+	private void loadUpdatePanelWithTktDetails(String selectedTktId, String selectedTktTitle) {
 		
 		incInUserQueueList.clear();
 		
@@ -793,15 +790,18 @@ public class ProvideTktUpdate {
 		if(!incInUserQueueList.isEmpty()){
 	//		System.out.println("ticket title :"+incInUserQueueList.get(0).getIncidentID()+ "--" +incInUserQueueList.get(0).getupdateCountryName()+"--"+incInUserQueueList.get(0).getdomainName());
 		
+			txtAreaTitle.setText(selectedTktTitle);
 			//For Domain Field..
-			if(incInUserQueueList.get(0).getdomainName() != null){ System.out.println("Inside");
+			if(incInUserQueueList.get(0).getdomainName() != null && 
+							!(incInUserQueueList.get(0).getdomainName().toString().equals("Not Set"))){ System.out.println("Inside");
 				cmbDomain.setSelectedItem(incInUserQueueList.get(0).getdomainName().trim());
 			}else{
 				cmbDomain.setSelectedItem(DEFAULTSELECTION);
 			}
 			
 			//For Sub Domain Field..
-			if(incInUserQueueList.get(0).getsubDomainName() != null){ 
+			if(incInUserQueueList.get(0).getsubDomainName() != null && 
+							!(incInUserQueueList.get(0).getsubDomainName().toString().equals("Not Set"))){ 
 				cmbSubDomain.setSelectedItem(incInUserQueueList.get(0).getsubDomainName().trim());
 			}else{
 				cmbSubDomain.setSelectedItem(DEFAULTSELECTION);
@@ -811,14 +811,16 @@ public class ProvideTktUpdate {
 			cmbStatus.setSelectedItem(STATUSINVESTIGATION);
 			
 			//For Issue in country field
-			if(incInUserQueueList.get(0).getupdateCountryName() != null){ 
+			if(incInUserQueueList.get(0).getupdateCountryName() != null  && 
+							!(incInUserQueueList.get(0).getupdateCountryName().toString().equals("Not Set"))){ 
 				cmbCountry.setSelectedItem(incInUserQueueList.get(0).getupdateCountryName().trim());
 			}else{
 				cmbCountry.setSelectedItem(DEFAULTSELECTION);
 			}	
 			
 			// For Root Cause Field..
-			if(incInUserQueueList.get(0).getrootCauseName() != null){ 
+			if(incInUserQueueList.get(0).getrootCauseName() != null  && 
+							!(incInUserQueueList.get(0).getrootCauseName().toString().equals("Not Set"))){ 
 				cmbRootCause.setSelectedItem(incInUserQueueList.get(0).getrootCauseName().trim());
 			}else{
 				cmbRootCause.setSelectedItem(DEFAULTSELECTION);
@@ -883,7 +885,7 @@ public class ProvideTktUpdate {
 	
 	private Map<String, String> fetchInputParamsInMap(Map<String, String> provideUpdateInputsMap) {
 		
-		provideUpdateInputsMap.put("TicketId", txtTicketId.getText().toString().trim());
+		provideUpdateInputsMap.put("TicketId", tbpTktView.getTitleAt(0));
 		provideUpdateInputsMap.put("Domain", cmbDomain.getSelectedItem().toString().trim());
 		provideUpdateInputsMap.put("SubDomain", cmbSubDomain.getSelectedItem().toString().trim());
 		provideUpdateInputsMap.put("Status", cmbStatus.getSelectedItem().toString().trim());

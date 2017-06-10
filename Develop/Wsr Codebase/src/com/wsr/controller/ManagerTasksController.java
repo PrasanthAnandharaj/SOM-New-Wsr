@@ -148,12 +148,13 @@ public class ManagerTasksController {
 private IncidentsBean setTempBean(ResultSet managerTasksRs, IncidentsBean tempBean, String methodType) throws SQLException {
 		
 		tempBean.setIncidentID(managerTasksRs.getString("IncidentID"));
+		tempBean.setInteractionID(managerTasksRs.getString("InteractionID"));
 		tempBean.setTitle(managerTasksRs.getString("Title"));
 		tempBean.setSeverity(managerTasksRs.getInt("Severity"));
 		tempBean.setAssignee(managerTasksRs.getString("Assignee"));
-		tempBean.setSla_target_date(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(managerTasksRs.getTimestamp("SLATargetDate")));
-		tempBean.setCreatedDate(managerTasksRs.getString("DateCreated"));
-		tempBean.setClosedDate(managerTasksRs.getString("DateClosed"));
+		tempBean.setSla_target_date(handleDateToString(managerTasksRs,"SLATargetDate"));//(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(managerTasksRs.getTimestamp("SLATargetDate")));
+		tempBean.setCreatedDate(handleDateToString(managerTasksRs,"DateCreated"));//(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(managerTasksRs.getTimestamp("DateCreated")));
+		tempBean.setClosedDate(handleDateToString(managerTasksRs,"DateClosed"));//(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(managerTasksRs.getTimestamp("DateClosed")));
 		tempBean.setWsrCurrentStatus(managerTasksRs.getString("Status"));
 		tempBean.setSm9Status(managerTasksRs.getString("SM7Status"));
 		tempBean.setRaisedBy(managerTasksRs.getString("ContactWhoRaised"));
@@ -166,10 +167,15 @@ private IncidentsBean setTempBean(ResultSet managerTasksRs, IncidentsBean tempBe
 			tempBean.setdomainName(managerTasksRs.getString("Domain_Name"));
 			tempBean.setsubDomainName(managerTasksRs.getString("SubDomain"));
 			tempBean.setrootCauseName(managerTasksRs.getString("RootCause"));
-			tempBean.setupdateCountryName(managerTasksRs.getString("CountryName"));
-			
-		}
-		return tempBean;
+			tempBean.setupdateCountryName(managerTasksRs.getString("CountryName"));			
+		}	
+		return tempBean;	
+	}
+
+	private String handleDateToString(ResultSet managerTasksRs, String dateOfColumn) throws SQLException {
+		String dateString = (!(managerTasksRs.getTimestamp(dateOfColumn) == null)) ? 
+				new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(managerTasksRs.getTimestamp("SLATargetDate")) :  "not set" ; 
+				return dateString;
 	}
 
 	private IncidentsBean setIncidentBean(Map<String, String> tableValueMap, IncidentsBean tempBean, String IterateThroughSheet) throws ParseException {

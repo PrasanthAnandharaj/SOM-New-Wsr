@@ -159,12 +159,13 @@ public class CommonTasksController {
 	private IncidentsBean setIncidentBean(ResultSet commonTasksRs,IncidentsBean incidentBean,String searchCriteria) throws SQLException {
 		
 		incidentBean.setIncidentID(commonTasksRs.getString("IncidentID"));
+		incidentBean.setInteractionID(commonTasksRs.getString("InteractionID"));
 		incidentBean.setTitle(commonTasksRs.getString("Title"));
-		incidentBean.setSla_target_date(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(commonTasksRs.getTimestamp("SLATargetDate")));
+		incidentBean.setSla_target_date(handleDateToString(commonTasksRs,"SLATargetDate"));//new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(commonTasksRs.getTimestamp("SLATargetDate")));
 		incidentBean.setAssignee(commonTasksRs.getString("Assignee"));
 		incidentBean.setSeverity(commonTasksRs.getInt("Severity"));
-		incidentBean.setCreatedDate(commonTasksRs.getString("DateCreated"));
-		incidentBean.setClosedDate(commonTasksRs.getString("DateClosed"));
+		incidentBean.setCreatedDate(handleDateToString(commonTasksRs,"DateCreated"));//new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(commonTasksRs.getTimestamp("DateCreated")));
+		incidentBean.setClosedDate(handleDateToString(commonTasksRs,"DateClosed"));//new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(commonTasksRs.getTimestamp("DateClosed")));
 		incidentBean.setWsrCurrentStatus(commonTasksRs.getString("Status"));
 		incidentBean.setSm9Status(commonTasksRs.getString("SM7Status"));
 		incidentBean.setRaisedBy(commonTasksRs.getString("ContactWhoRaised"));
@@ -178,10 +179,14 @@ public class CommonTasksController {
 			incidentBean.setsubDomainName(commonTasksRs.getString("SubDomain"));
 			incidentBean.setrootCauseName(commonTasksRs.getString("RootCause"));
 			incidentBean.setupdateCountryName(commonTasksRs.getString("CountryName"));			
-		}
-		
-		return incidentBean;
-		
+		}	
+		return incidentBean;	
+	}
+
+	private String handleDateToString(ResultSet commonTasksRs, String dateOfColumn) throws SQLException {
+		String dateString = (!(commonTasksRs.getTimestamp(dateOfColumn) == null)) ? 
+			new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(commonTasksRs.getTimestamp("SLATargetDate")) :  "not set" ; 
+		return dateString;
 	}
 	
 	//Move this changes to join query and handle it in fetchFromDb()..

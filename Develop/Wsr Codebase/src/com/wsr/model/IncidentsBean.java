@@ -109,25 +109,25 @@ public class IncidentsBean {
 		this.isUpdated = isUpdated;
 	}
 	public String getdomainName() {
-		return domainName;
+		return handleNotSetValue(domainName);
 	}
 	public void setdomainName(String domainName) {
 		this.domainName = domainName;
 	}
 	public String getsubDomainName() {
-		return subDomainName;
+		return handleNotSetValue(subDomainName);
 	}
 	public void setsubDomainName(String subDomainName) {
 		this.subDomainName = subDomainName;
 	}
 	public String getrootCauseName() {
-		return rootCauseName;
+		return handleNotSetValue(rootCauseName);
 	}
 	public void setrootCauseName(String rootCauseName) {
 		this.rootCauseName = rootCauseName;
 	}
 	public String getupdateCountryName() {
-		return updateCountryName;
+		return handleNotSetValue(updateCountryName);
 	}
 	public void setupdateCountryName(String updateCountryName) {
 		this.updateCountryName = updateCountryName;
@@ -149,5 +149,9 @@ public class IncidentsBean {
 	}
 	public void setUpdateTime(String updateTime) {
 		this.updateTime = updateTime;
+	}
+	private String handleNotSetValue(String attrVal) {
+		String handledVal = (attrVal == null || attrVal.equals("nil") || attrVal.equals("")) ? "Not Set" : attrVal;
+		return handledVal;
 	}
 }
