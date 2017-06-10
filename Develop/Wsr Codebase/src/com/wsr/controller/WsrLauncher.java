@@ -26,12 +26,12 @@ public class WsrLauncher {
 				authorisationRs = dbAccessorObj.queryToDb(authorisationQuery);
 				if(authorisationRs.next()) {
 					AuthoriseBean loggedUserBean = new AuthoriseBean();
-				//	loggedUserBean = setAuthoriseBean(authorisationRs,loggedUserBean);
-			//		 Comment above line and use the below lines for Checking Manager functions till Dev and then remove..
+					loggedUserBean = setAuthoriseBean(authorisationRs,loggedUserBean);
+			/*		 Comment above line and use the below lines for Checking Manager functions till Dev and then remove..
 					  loggedUserBean.setFirstName("Divya");
 						loggedUserBean.setLastName("Saxena");
 						loggedUserBean.setUserId("D.Saxena");
-						loggedUserBean.setRole("Admin");
+						loggedUserBean.setRole("Admin");*/
 						
 					landingPageObj.diplayManagerPageUI(loggedUserBean);
 				}else{
